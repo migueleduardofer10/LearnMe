@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="start"
+    android:padding="24dp">
+
+    <!-- Saludo personalizado -->
+    <TextView
+        android:id="@+id/welcomeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hola, Andrew"
+        android:textSize="28sp"
+    android:layout_marginBottom="30dp"/>
+
+    <!-- Título grande -->
+    <TextView
+        android:id="@+id/headingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ÑAHUI"
+        android:textSize="40sp"
+    android:textStyle="bold"
+    android:layout_marginBottom="40dp"/>
+
+    <TextView
+        android:id="@+id/descriptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae magna ac lorem laoreet mattis. Maecenas quam augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae magna ac lorem laoreet mattis. Maecenas quam augue."
+        android:textSize="18sp"
+    android:lineSpacingExtra="8dp"
+    android:layout_marginBottom="40dp"/>
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Empezar"
+        android:textSize="20sp"
+    android:padding="16dp"
+    android:layout_marginBottom="40dp"/>
+</LinearLayout>

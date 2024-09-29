@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Especifica el color de fondo del contenedor -->
+    <solid android:color="#FFFFFF" />
+
+    <!-- Especifica el radio de las esquinas -->
+    <corners android:radius="16dp" />
+
+    <!-- Define un borde opcional alrededor del contenedor -->
+    <stroke
+        android:width="2dp"
+        android:color="#000000" />
+
+    <!-- Añade margen opcional interno -->
+    <padding
+        android:left="8dp"
+        android:right="8dp"
+        android:top="8dp"
+        android:bottom="8dp" />
+</shape>
