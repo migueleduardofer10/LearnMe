@@ -12,72 +12,89 @@
         android:layout_height="0dp"
         android:layout_weight="7"
         android:background="#E0E0E0"
-    android:gravity="center">
+        android:gravity="center">
 
+        <!-- Vista previa de la cámara -->
         <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
+            android:id="@+id/viewFinder"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-</FrameLayout>
 
-<LinearLayout
-android:layout_width="match_parent"
-android:layout_height="0dp"
-android:layout_weight="3"
-android:orientation="vertical"
-android:padding="16dp"
-android:background="@drawable/rounded_corners">
+        <!-- OverlayView para dibujar las cajas de detección -->
+        <com.example.learnme.MyCameraCaptureActivity.OverlayView
+            android:id="@+id/overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:translationZ="5dp" />
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_marginBottom="16dp"
-    android:gravity="center">
+        <!-- TextView para mostrar el tiempo de inferencia -->
+        <TextView
+            android:id="@+id/inferenceTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text="Tiempo: 100ms"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:textSize="16sp"/>
+    </FrameLayout>
 
-    <Spinner
-        android:id="@+id/classSpinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/rounded_corners">
 
-    <Button
-        android:id="@+id/addClassButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="+" />
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center">
 
-<!-- Subir archivos y Contador -->
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_marginBottom="16dp"
-    android:gravity="center">
+            <Spinner
+                android:id="@+id/classSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/uploadButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Subir archivos"
-        android:layout_weight="1" />
+            <Button
+                android:id="@+id/addClassButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+" />
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/fileCountTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="20/40"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp" />
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center">
 
-<Button
-    android:id="@+id/nextButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Siguiente"
-    android:layout_gravity="center" />
-</LinearLayout>
+            <Button
+                android:id="@+id/uploadButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Subir archivos"
+                android:layout_weight="1" />
 
+            <TextView
+                android:id="@+id/fileCountTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20/40"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Siguiente"
+            android:layout_gravity="center" />
     </LinearLayout>
+</LinearLayout>

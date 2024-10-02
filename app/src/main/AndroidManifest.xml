@@ -37,7 +37,7 @@
             android:theme="@style/Theme.LearnMe" />
 
         <activity
-            android:name=".CameraCaptureActivity"
+            android:name=".MyCameraCaptureActivity.CameraCaptureActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />

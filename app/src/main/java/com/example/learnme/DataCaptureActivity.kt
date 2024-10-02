@@ -15,10 +15,8 @@ class DataCaptureActivity : ComponentActivity() {
 
         nextButton.setOnClickListener {
 
-            val intent = Intent(this, CameraCaptureActivity::class.java)
+            val intent = Intent(this, com.example.learnme.MyCameraCaptureActivity.CameraCaptureActivity::class.java)
             startActivity(intent)
-
-
         }
     }
 }
