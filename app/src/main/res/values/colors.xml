@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
+    <color name="principal">#25282A</color>
+    <color name="secundario_1">#414345</color>
+    <color name="secundario_2">#C9CACA</color>
+    <color name="secundario_3">#E4E5E5</color>
+
     <color name="white">#FFFFFFFF</color>
     <color name="bounding_box_color">#234567</color>
 </resources>

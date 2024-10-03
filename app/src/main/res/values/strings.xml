@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">LearnMe</string>
+    <string name="app_name">NAHUI</string>
+    <string name="welcome_message">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae magna ac lorem laoreet mattis. Maecenas quam augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vitae magna ac lorem laoreet mattis. Maecenas quam augue.</string>
+    <string name="data_capture_description">Registra videos de los objetos que quieres clasificar para crear clases personalizadas y entrenar el modelo.</string>
+    <string name="training_description">Entrena tu modelo automáticamente con los videos capturados para que aprenda a reconocer los objetos definidos.</string>
+    <string name="testing_description">Utiliza la cámara en tiempo real para probar el modelo y ver cómo clasifica los objetos que detecta.</string>
+
 </resources>

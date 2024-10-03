@@ -9,25 +9,38 @@
 
     <TextView
         android:id="@+id/stepNumber"
-        android:text="1"
+        android:text="2"
         android:layout_marginBottom="10dp"
         style="@style/step_number"/>
 
     <TextView
         android:id="@+id/headingTextView"
-        android:text="Captura de datos"
+        android:text="Entrenamiento"
         android:layout_marginBottom="20dp"
         style="@style/step_title"/>
 
     <TextView
         android:id="@+id/descriptionTextView"
-        android:text="@string/data_capture_description"
+        android:text="@string/training_description"
         android:layout_marginBottom="40dp"
         style="@style/content_text"/>
 
-    <Button
-        android:id="@+id/nextButton"
-        android:text="Siguiente"
-        android:layout_marginBottom="40dp"
-        style="@style/button_1"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/backButton"
+            style="@style/button_1"
+            android:text="Anterior" />
+
+        <Button
+            android:id="@+id/nextButton"
+            android:text="Siguiente"
+            style="@style/button_1" />
+
+    </LinearLayout>
+
 </LinearLayout>
