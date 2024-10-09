@@ -15,7 +15,7 @@
         android:theme="@style/Theme.LearnMe"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe">
@@ -26,30 +26,30 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".StartActivity"
+            android:name=".activity.WelcomeActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
         <activity
-            android:name=".DataCaptureActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.LearnMe" />
-
-        <activity
-            android:name=".Testing"
+            android:name=".activity.Step1Activity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
 
         <activity
-            android:name=".Training"
+            android:name=".activity.Step3Activity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
 
         <activity
-            android:name=".MyCameraCaptureActivity.CameraCaptureActivity"
+            android:name=".activity.Step2Activity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LearnMe" />
+
+        <activity
+            android:name=".fragment.ImageGridActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />

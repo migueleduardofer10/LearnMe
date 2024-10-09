@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingVertical="50dp"
+    android:paddingHorizontal="30dp">
+
+
+    <TextView
+        android:id="@+id/fileCountTextView"
+        android:layout_gravity="start"
+        android:paddingBottom="10dp"
+        android:text="Imágenes capturadas"
+        style="@style/step_subtitle"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="5">
+
+        <ImageView>
+
+        </ImageView>
+    </GridLayout>
+</LinearLayout>

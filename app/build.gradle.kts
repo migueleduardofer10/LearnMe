@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        dataBinding = true
         viewBinding = true
     }
     composeOptions {
@@ -68,6 +69,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // RecyclerView
+    implementation ("androidx.recyclerview:recyclerview:1.3.2")
+
     val cameraxVersion = "1.3.4"
     implementation("androidx.camera:camera-core:$cameraxVersion")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
@@ -78,4 +82,5 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
-    implementation("com.airbnb.android:lottie:6.5.2")}
+    implementation("com.airbnb.android:lottie:6.5.2")
+}

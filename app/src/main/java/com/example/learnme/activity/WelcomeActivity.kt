@@ -1,16 +1,19 @@
-package com.example.learnme
+package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import com.example.learnme.R
 
-class StartActivity : ComponentActivity() {
+class WelcomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_start)  // Aquí vinculamos activity_start.xml a StartActivity
+        setContentView(R.layout.activity_welcome)  // Aquí vinculamos activity_start.xml a StartActivity
 
+
+        //Debemos borrar este intent
         val name = intent.getStringExtra("USER_NAME")
 
         val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
@@ -24,7 +27,7 @@ class StartActivity : ComponentActivity() {
         val startButton = findViewById<Button>(R.id.startButton)
 
         startButton.setOnClickListener {
-            val intent = Intent(this, DataCaptureActivity::class.java)
+            val intent = Intent(this, Step1Activity::class.java)
             startActivity(intent)
         }
     }

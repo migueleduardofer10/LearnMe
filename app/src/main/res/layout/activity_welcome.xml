@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:padding="20dp">
+
+    <!-- Saludo personalizado -->
+    <TextView
+        android:id="@+id/welcomeTextView"
+        android:text="¡Hola!"
+        android:layout_marginBottom="30dp"
+        style="@style/welcome_text"/>
+
+    <TextView
+        android:id="@+id/descriptionTextView"
+        android:text="@string/welcome_message"
+        android:layout_marginBottom="10dp"
+        style="@style/content_text"/>
+    <TextView
+        android:id="@+id/descriptionTextView2"
+        android:text="¡Comienza a crear tu propio modelo personalizado en pocos pasos!"
+        android:layout_marginBottom="40dp"
+        android:textStyle="bold"
+        style="@style/content_text"/>
+
+    <Button
+        android:id="@+id/startButton"
+        android:text="Empezar"
+        android:layout_marginBottom="40dp"
+        style="@style/button_1"/>
+</LinearLayout>
