@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.fragment.ItemAdapter
@@ -41,7 +40,8 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             startActivity(intent)
         }
 
-        val newClassButton = findViewById<Button>(R.id.newClassButton)
+        // Botón para agregar una nueva clase
+        // val newClassButton = findViewById<Button>(R.id.newClassButton)
 
     }
 
