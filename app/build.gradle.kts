@@ -83,4 +83,8 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
     implementation("com.airbnb.android:lottie:6.5.2")
+
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    // To use constraintlayout in compose
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 }

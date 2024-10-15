@@ -16,7 +16,7 @@ class Step1Activity : ComponentActivity() {
 
         nextButton.setOnClickListener {
 
-            val intent = Intent(this, Step2Activity::class.java)
+            val intent = Intent(this, ClassSelectionActivity::class.java)
             startActivity(intent)
         }
     }

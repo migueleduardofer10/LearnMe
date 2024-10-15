@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingVertical="50dp"
-    android:paddingHorizontal="30dp">
+    android:layout_height="match_parent">
 
-
-    <TextView
-        android:id="@+id/fileCountTextView"
-        android:layout_gravity="start"
-        android:paddingBottom="10dp"
-        android:text="Imágenes capturadas"
-        style="@style/step_subtitle"/>
-
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="5">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingVertical="50dp"
+        android:paddingHorizontal="30dp">
 
-        <ImageView>
+        <!-- REEMPLAZAR POR CAMARA -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="352dp"
+            android:background="@drawable/rounded_corners"
+            android:layout_marginBottom="40dp"/>
 
-        </ImageView>
-    </GridLayout>
-</LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -15,7 +15,7 @@ class Step3Activity : ComponentActivity() {
         val nextButton = findViewById<Button>(R.id.nextButton)
 
         nextButton.setOnClickListener {
-            val intent = Intent(this, com.example.learnme.fragment.ImageGridActivity::class.java)
+            val intent = Intent(this, DataCaptureActivity::class.java)
             startActivity(intent)
         }
     }

@@ -1,27 +1,21 @@
-package com.example.learnme.fragment
+package com.example.learnme.activity
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import androidx.activity.ComponentActivity
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
+import com.example.learnme.fragment.ImageItem
 
-//Creo que se debe definir como Clase recursiva
 
-class ImageGridActivity : ComponentActivity(){
+class ImageGaleryActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_data_capture)
+        setContentView(R.layout.activity_image_galery)
 
         // Find RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewImages)
-
-        // Define the grid layout with 3 columns
-        val spanCount = 5
-        recyclerView.layoutManager = GridLayoutManager(this, spanCount)
-
-        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing) // Define grid_spacing in your dimens.xml
-        recyclerView.addItemDecoration(GridSpacingItemDecoration(spanCount, spacing, true))
 
         // Replace with actual image loading
         val imageList = listOf(
@@ -34,8 +28,16 @@ class ImageGridActivity : ComponentActivity(){
             ImageItem(R.drawable.ic_launcher_background),
         )
 
-        // Set up the adapter
-        val adapter = ImageGridAdapter(imageList)
-        recyclerView.adapter = adapter
+        // Configurar el grid con 3 columnas, espaciado y pasar la lista de imágenes
+        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
+        GridConfig.setupGridWithAdapter(recyclerView, this, spanCount = 5, spacing = spacing, imageList = imageList)
+
+
+        val backButton = findViewById<Button>(R.id.backButton)
+
+        backButton.setOnClickListener {
+            val intent = Intent(this, CaptureResumeActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

@@ -1,7 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="50dp">
+
+        <!-- RecyclerView que mostrará la lista de elementos -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewItems"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="30dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="40dp"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/newClassButton"
+            android:layout_weight="1"
+            android:text="Nueva clase"
+            android:drawableLeft="@android:drawable/ic_menu_zoom"
+            android:layout_marginRight="10dp"
+            style="@style/button_2"/>
+
+        <Button
+            android:id="@+id/nextButton"
+            android:layout_weight="1"
+            android:text="Siguiente"
+            android:drawableLeft="@android:drawable/ic_menu_zoom"
+            style="@style/button_2"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -49,7 +49,22 @@
             android:theme="@style/Theme.LearnMe" />
 
         <activity
-            android:name=".fragment.ImageGridActivity"
+            android:name=".activity.DataCaptureActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LearnMe" />
+        <activity
+            android:name=".activity.CaptureResumeActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LearnMe" />
+        <activity
+            android:name=".activity.ClassSelectionActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LearnMe" />
+        <activity
+            android:name=".activity.ImageGaleryActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />

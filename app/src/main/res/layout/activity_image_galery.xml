@@ -1,7 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingVertical="50dp"
+        android:paddingHorizontal="30dp"
+        android:layout_above="@+id/buttonLayout">
+
+        <TextView
+            android:id="@+id/fileCountTextView"
+            android:layout_gravity="start"
+            android:paddingBottom="10dp"
+            android:text="Imágenes capturadas"
+            style="@style/step_subtitle"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:paddingLeft="-4dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="30dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="40dp"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/backButton"
+            android:layout_weight="1"
+            android:text="Volver"
+            android:drawableLeft="@android:drawable/ic_menu_zoom"
+            android:layout_marginRight="10dp"
+            style="@style/button_2"/>
+
+        <Button
+            android:id="@+id/cameraButton"
+            android:layout_weight="1"
+            android:text="Mantener"
+            android:drawableLeft="@android:drawable/ic_menu_zoom"
+            style="@style/button_2"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
