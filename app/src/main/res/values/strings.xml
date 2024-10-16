@@ -5,4 +5,49 @@
     <string name="training_description">Entrena tu modelo automáticamente con los videos capturados para que aprenda a reconocer los objetos definidos.</string>
     <string name="testing_description">Utiliza la cámara en tiempo real para probar el modelo y ver cómo clasifica los objetos que detecta.</string>
 
+
+    <string name="control_dialog_thread_button_minus">Disminuir el número de hilos usados</string>
+    <string name="control_dialog_thread_button_plus">Aumentar el número de hilos usados</string>
+    <string name="label_inference_time">Tiempo de inferencia</string>
+    <string name="label_threads">Número de hilos</string>
+    <string name="helper_dialog_title">Cómo usar la aplicación</string>
+    <string name="helper_dialog_content">
+        1. Hay 4 clases en la aplicación representadas por los 4 números
+        (1..4)\n\n
+        2. Cada número puede asociarse a una categoría de objeto (ej.
+        coche, fruta, etc.)\n\n
+        3. Toma al menos 1 imagen para habilitar el entrenamiento. Para el uso
+        previsto, por favor toma al menos 100 imágenes por categoría antes de entrenar.\n\n
+        4. Usa el botón de número mientras apuntas la cámara a un objeto para
+        recolectar la imagen.\n\n
+        Si haces clic una vez en el botón de número, se tomará una muestra del
+        objeto y se guardará. Si mantienes presionado el botón, continuará
+        recolectando muestras hasta que lo sueltes.\n\n
+        5. Pulsa el botón de entrenar para comenzar el entrenamiento. Una vez
+        que la pérdida sea lo suficientemente pequeña (ej. \uFE641.0), presiona el botón de pausa. Si la pérdida no converge a un número pequeño, presiona pausa, agrega
+        más imágenes para cada categoría y presiona el botón de reanudar.\n\n
+        6. Cambia al modo de inferencia y apunta la cámara hacia un objeto.
+        Cada botón de clase mostrará la probabilidad de que el objeto
+        pertenezca a esa categoría y resaltará la más probable.\n\n
+        Si el entrenamiento ha sido exitoso, la categoría correcta será
+        resaltada. Si el objeto no pertenece a ninguna de las cuatro
+        categorías entrenadas, la aplicación intentará resaltar una de las
+        categorías más cercanas según su mejor suposición.\n\n
+        7. Siempre puedes volver al modo de entrenamiento y capturar más
+        imágenes.
+    </string>
+    <string name="tv_number_of_threads_default">2</string>
+    <string name="btn_setting_dialog_cancel">Cancelar</string>
+    <string name="btn_setting_dialog_confirm">Confirmar</string>
+    <string name="radio_btn_training_mode">Entrenar</string>
+    <string name="radio_btn_inference_mode">Probar</string>
+    <string name="tv_class_one">1</string>
+    <string name="tv_class_two">2</string>
+    <string name="tv_class_three">3</string>
+    <string name="tv_class_four">4</string>
+    <string name="tv_start_training">Entrenar</string>
+    <string name="tv_pause_training">Pausar</string>
+    <string name="tv_resume_training">Reanudar</string>
+    <string name="tv_collect_sample">Tomar muestras</string>
+    <string name="tv_icon_helper">\?</string>
 </resources>

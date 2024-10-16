@@ -7,8 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.learnme.fragment.ItemAdapter
-import com.example.learnme.fragment.ItemClass
+import com.example.learnme.fragments.ItemAdapter
+import com.example.learnme.fragments.ItemClass
 import com.example.learnme.R
 
 
