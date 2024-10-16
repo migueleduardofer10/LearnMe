@@ -7,4 +7,19 @@
 
     <color name="white">#FFFFFFFF</color>
     <color name="bounding_box_color">#234567</color>
+
+
+    <!-- TF Branding Orange -->
+    <color name="tfl_color_orange">#FF6F00</color>
+    <color name="tfl_color_orange_light">#FFFFA800</color>
+    <color name="toolbar_background">#EEEEEE</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="text_color">@android:color/black</color>
+    <color name="text_color_white">@android:color/white</color>
+    <color name="icActive">#FFFFFFFF</color>
+    <color name="icFocused">#DDFFFFFF</color>
+    <color name="icPressed">#AAFFFFFF</color>
+    <color name="btn_green">#00db8b</color>
+    <color name="btn_gray">#7c8890</color>
+    <color name="btn_yellow">#ede27e</color>
 </resources>

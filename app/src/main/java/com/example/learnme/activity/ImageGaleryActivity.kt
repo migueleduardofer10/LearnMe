@@ -6,7 +6,7 @@ import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
-import com.example.learnme.fragment.ImageItem
+import com.example.learnme.fragments.ImageItem
 
 
 class ImageGaleryActivity : ComponentActivity(){
