@@ -43,6 +43,8 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         // Botón para agregar una nueva clase
         // val newClassButton = findViewById<Button>(R.id.newClassButton)
 
+
+
     }
 
     // Manejar clics en los botones

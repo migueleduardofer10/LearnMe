@@ -97,4 +97,9 @@ dependencies {
     val nav_version = "2.8.0"
     implementation ("androidx.navigation:navigation-fragment-ktx:$nav_version")
     implementation ("androidx.navigation:navigation-ui-ktx:$nav_version")
+
+    implementation("com.android.volley:volley:1.2.1")
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 }
