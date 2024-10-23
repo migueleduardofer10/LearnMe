@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".activity.GTP4Activity">
+    tools:context=".activity.GPT4Activity">
 
     <EditText
         android:id="@+id/etQuestion"
