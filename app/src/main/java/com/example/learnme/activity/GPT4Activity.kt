@@ -1,5 +1,8 @@
 package com.example.learnme.activity
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
@@ -17,10 +20,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
-import java.io.File
-import java.io.FileInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 
@@ -36,11 +38,13 @@ class GPT4Activity : ComponentActivity() {
         val btnSubmit = findViewById<Button>(R.id.btnSubmit)
         val txtAnswer = findViewById<TextView>(R.id.txtAnswer)
 
+
         btnSubmit.setOnClickListener {
-            val question = etQuestion.text.toString()
-            Toast.makeText(this, question, Toast.LENGTH_SHORT).show()
+            val base64Image = encodeDrawableToBase64(this, R.drawable.manzana)
+
+            Toast.makeText(this, "Imagen codificada en base64", Toast.LENGTH_SHORT).show()
             // Lógica para enviar la pregunta a la API de GPT-4 y obtener la respuesta
-            getResponse(question) {response ->
+            getResponse(this, base64Image) {response ->
                 runOnUiThread {
                     txtAnswer.text = response
                 }
@@ -48,41 +52,52 @@ class GPT4Activity : ComponentActivity() {
         }
     }
 
+    fun encodeDrawableToBase64(context: Context, drawableId: Int): String {
+        // Decodificar la imagen desde los resources (drawable)
+        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId)
 
+        // Crear un ByteArrayOutputStream para contener los bytes de la imagen
+        val byteArrayOutputStream = ByteArrayOutputStream()
 
-    // Función para codificar una imagen en Base64
-    fun encodeImage(imagePath: String): String {
-        val imageFile = File(imagePath)
-        val fileInputStream = FileInputStream(imageFile)
-        val imageBytes = fileInputStream.readBytes()
-        fileInputStream.close()
+        // Comprimir la imagen en formato JPEG y escribirla en el ByteArrayOutputStream
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
 
-        // Codifica la imagen en Base64
-        return Base64.encodeToString(imageBytes, Base64.DEFAULT)
+        // Obtener el array de bytes de la imagen
+        val byteArray = byteArrayOutputStream.toByteArray()
+
+        // Codificar el array de bytes a base64
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
 
-    fun getResponse(question: String, callback: (String) -> Unit) {
+
+
+    fun getResponse(context: Context, imagePath: String, callback: (String) -> Unit) {
         val URL = GPTConfig.BASE_URL
         val API_KEY = GPTConfig.CHAT_GPT_API_KEY
-
-//        val base64Image = encodeImage(imagePath)
 
         val requestBody = """ {
             "model": "gpt-4o-mini",
             "messages": [
               {
-                "role": "system",
+                "role": "user",
                 "content": [
                   {
                     "type": "text",
-                    "text": "$question"
-
+                    "text": "Describe en 5 palabras la imagen"
+                  },
+                  {
+                    "type": "image_url",
+                    "image_url": {
+                      "url": "data:image/jpeg;base64,$imagePath"
+                    }
                   }
                 ]
               }
             ],
             "max_tokens": 300
         } """.trimIndent()
+
+        println(requestBody)
 
         val request = Request.Builder()
             .url(URL)
@@ -100,23 +115,19 @@ class GPT4Activity : ComponentActivity() {
                 val body = response.body?.string()
                 if (body != null) {
                     Log.v("data", body)
+                    try {
+                        // Parsear la respuesta JSON
+                        val jsonObject = JSONObject(body)
+                        val choicesArray = jsonObject.getJSONArray("choices")
+                        val contentResult = choicesArray.getJSONObject(0).getJSONObject("message").getString("content")
+                        callback(contentResult)
+                    } catch (e: JSONException) {
+                        Log.e("Error", "Failed to parse JSON", e)
+                        Toast.makeText(context, "Failed to parse JSON", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     Log.v("data", "empty")
                 }
-
-                val jsonObject = JSONObject(body)
-
-//                // Verifica si "choices" existe en la respuesta antes de acceder a él. Falta cachear el error
-//                if (jsonObject.has("choices")) {
-//                    val choices = jsonObject.getJSONArray("choices")
-//                    // Aquí manejas el resultado como lo hacías antes.
-//                } else {
-//                    println("Error: La API de OpenAI ha retornado un error.")
-//                }
-
-                val jsonArray: JSONArray = jsonObject.getJSONArray("choices")
-                val textResult = jsonArray.getJSONObject(0).getJSONObject("message").getString("content")
-                callback(textResult)
             }
         })
     }
