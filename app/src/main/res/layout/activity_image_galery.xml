@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/buttonLayout"
         android:orientation="vertical"
-        android:paddingVertical="50dp"
         android:paddingHorizontal="30dp"
-        android:layout_above="@+id/buttonLayout">
+        android:paddingVertical="50dp">
+
+        <TextView
+            android:id="@+id/nameTitleText"
+            style="@style/Headline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Galería" />
 
         <TextView
             android:id="@+id/fileCountTextView"
-            android:layout_gravity="start"
-            android:paddingBottom="10dp"
-            android:text="Imágenes capturadas"
-            style="@style/step_subtitle"/>
+            style="@style/Paragraph"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Recientes" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewImages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="vertical"
-            android:paddingLeft="-4dp"/>
+            android:paddingStart="-2dp"/>
 
     </LinearLayout>
 
@@ -33,27 +41,26 @@
         android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/fixed_bar"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingHorizontal="30dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="40dp"
-        android:layout_alignParentBottom="true">
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
 
         <Button
             android:id="@+id/backButton"
-            android:layout_weight="1"
-            android:text="Volver"
-            android:drawableLeft="@android:drawable/ic_menu_zoom"
-            android:layout_marginRight="10dp"
-            style="@style/button_2"/>
+            style="@style/button_2"
+            android:layout_marginEnd="86dp"
+            android:drawableTop="@drawable/keyboard_double_arrow_left_40px"
+            android:text="Volver" />
 
         <Button
-            android:id="@+id/cameraButton"
-            android:layout_weight="1"
-            android:text="Mantener"
-            android:drawableLeft="@android:drawable/ic_menu_zoom"
-            style="@style/button_2"/>
+            android:id="@+id/checkButton"
+            style="@style/button_2"
+            android:drawableTop="@drawable/check_40px"
+            android:text="Confirmar" />
 
     </LinearLayout>
 

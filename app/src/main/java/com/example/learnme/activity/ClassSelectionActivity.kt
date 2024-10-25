@@ -18,14 +18,11 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
         // Lista de datos de ejemplo
         val itemList = listOf(
-            ItemClass("Clase 1", "Descripción de clase 1"),
-            ItemClass("Clase 2", "Descripción de clase 2"),
-            ItemClass("Clase 1", "Descripción de clase 1"),
-            ItemClass("Clase 2", "Descripción de clase 2"),
-            ItemClass("Clase 1", "Descripción de clase 1"),
-            ItemClass("Clase 2", "Descripción de clase 2"),
-            ItemClass("Clase 3", "Descripción de clase 3")
-
+            ItemClass("Clase 1"),
+            ItemClass("Clase 2"),
+            ItemClass("Clase 3"),
+            ItemClass("Clase 4"),
+            ItemClass("Clase 5"),
         )
 
         // Configurar el RecyclerView

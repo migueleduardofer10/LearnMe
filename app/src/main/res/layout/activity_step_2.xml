@@ -9,21 +9,28 @@
 
     <TextView
         android:id="@+id/stepNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="2"
-        android:layout_marginBottom="10dp"
-        style="@style/step_number"/>
+        android:layout_marginBottom="32dp"
+        android:textSize="96sp"
+        style="@style/Headline1"/>
 
     <TextView
         android:id="@+id/headingTextView"
-        style="@style/step_title"
-        android:layout_marginBottom="20dp"
-        android:text="Entrenamiento" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Entrenamiento"
+        android:layout_marginBottom="12dp"
+        style="@style/Headline1"/>
 
     <TextView
         android:id="@+id/descriptionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/training_description"
         android:layout_marginBottom="40dp"
-        style="@style/content_text"/>
+        style="@style/Paragraph"/>
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -33,13 +40,13 @@
 
         <Button
             android:id="@+id/backButton"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             style="@style/button_1"
             android:text="Anterior" />
 
         <Button
             android:id="@+id/nextButton"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:text="Siguiente"
             style="@style/button_1" />
 

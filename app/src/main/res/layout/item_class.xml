@@ -2,90 +2,68 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/rounded_corners"
     android:padding="20dp"
     android:layout_marginBottom="10dp">
 
-    <!-- Encabezado de la Clase -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/classNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Clase 1"
+        style="@style/Headline5"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp">
 
         <TextView
-            android:id="@+id/fileCountTextView"
+            android:id="@+id/imgCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:text="Clase 1"
-            style="@style/step_subtitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            android:layout_marginEnd="20dp"
+            android:text="Muestras: ¿?"
+            style="@style/Paragraph"/>
 
-        <Button
-            android:id="@+id/inteligenceButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:drawableEnd="@android:drawable/ic_menu_zoom"
-            android:layout_marginEnd="10dp"
-            style="@style/button_2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Color de la clase"
+            android:background="@drawable/btn_round"
+            android:backgroundTint="@color/principal"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-    <!-- Controles Inferiores -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:text="Añadir muestras"
-            style="@style/step_subtitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <!-- Botón Volver -->
-        <Button
-            android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Volver"
-            android:drawableStart="@android:drawable/ic_menu_zoom"
-            style="@style/button_2"
-            app:layout_constraintTop_toBottomOf="@+id/count"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <!-- Botón Subir -->
-        <Button
+        <ImageButton
             android:id="@+id/uploadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Subir"
-            android:drawableStart="@android:drawable/ic_menu_zoom"
-            style="@style/button_2"
-            app:layout_constraintTop_toBottomOf="@+id/count"
-            app:layout_constraintStart_toEndOf="@+id/backButton"
-            android:layout_marginStart="8dp"/>
+            android:src="@drawable/photo_camera_36px"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="Botón con ícono de subir"
+            style="@style/button_3"/>
 
-        <!-- Botón Editar -->
-        <Button
+        <ImageButton
+            android:id="@+id/cameraButton"
+            android:src="@drawable/photo_camera_36px"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="Botón con ícono de cámara"
+            style="@style/button_3"/>
+
+        <ImageButton
             android:id="@+id/editButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Editar"
-            android:drawableStart="@android:drawable/ic_menu_zoom"
-            style="@style/button_2"
-            app:layout_constraintTop_toBottomOf="@+id/count"
-            app:layout_constraintStart_toEndOf="@+id/uploadButton"
-            android:layout_marginStart="8dp"/>
+            android:src="@drawable/photo_camera_36px"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="Botón con ícono de editar"
+            style="@style/button_3"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
+    </LinearLayout>
 </LinearLayout>

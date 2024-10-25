@@ -6,17 +6,18 @@ import android.widget.Button
 import androidx.activity.ComponentActivity
 import com.example.learnme.R
 
-class Step3Activity : ComponentActivity() {
+class TrainingLoadActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_step_3)
+        setContentView(R.layout.activity_training_load)
 
-        val nextButton = findViewById<Button>(R.id.nextButton)
+        val stopButton = findViewById<Button>(R.id.stopButton)
 
-        nextButton.setOnClickListener {
-            val intent = Intent(this, ModelTestingActivity::class.java)
+        stopButton.setOnClickListener {
+            val intent = Intent(this, Step3Activity::class.java)
             startActivity(intent)
         }
+
     }
 }
