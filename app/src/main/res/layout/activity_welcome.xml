@@ -1,34 +1,199 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center_vertical"
-    android:padding="20dp">
+    android:gravity="end"
+    android:paddingHorizontal="6dp"
+    android:layout_marginTop="-80dp">
 
-    <!-- Saludo personalizado -->
-    <TextView
-        android:id="@+id/welcomeTextView"
-        android:text="¡Hola!"
-        android:layout_marginBottom="30dp"
-        style="@style/welcome_text"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/descriptionTextView"
-        android:text="@string/welcome_message"
-        android:layout_marginBottom="10dp"
-        style="@style/content_text"/>
-    <TextView
-        android:id="@+id/descriptionTextView2"
-        android:text="¡Comienza a crear tu propio modelo personalizado en pocos pasos!"
-        android:layout_marginBottom="40dp"
-        android:textStyle="bold"
-        style="@style/content_text"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            tools:ignore="NestedWeights">
 
-    <Button
-        android:id="@+id/startButton"
-        android:text="Empezar"
-        android:layout_marginBottom="40dp"
-        style="@style/button_1"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_6"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_2"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_9"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_1"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1.4"
+            android:layout_marginTop="60dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="6dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"
+                android:src="@drawable/grid_12"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="6dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"
+                android:src="@drawable/grid_13"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="6dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"
+                android:src="@drawable/grid_7"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="6dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"
+                android:src="@drawable/grid_8"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"
+                android:src="@drawable/grid_11"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            tools:ignore="NestedWeights">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_4"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_5"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_3"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:src="@drawable/grid_10"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/img_round"
+                android:clipToOutline="true"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/welcomeTextView"
+            android:text="¡Bienvenido!"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            style="@style/Headline1"/>
+
+        <TextView
+            android:id="@+id/descriptionTextView"
+            android:text="@string/welcome_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:textAlignment="center"
+            style="@style/Paragraph"/>
+
+        <Button
+            android:id="@+id/startButton"
+            android:text="Siguiente"
+            style="@style/button_1" />
+
+    </LinearLayout>
+
 </LinearLayout>
