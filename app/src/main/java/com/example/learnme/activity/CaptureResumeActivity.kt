@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
+import com.example.learnme.config.GridConfig
 import com.example.learnme.fragments.ImageItem
 
 //Creo que se debe definir como Clase recursiva
