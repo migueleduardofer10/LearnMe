@@ -6,17 +6,11 @@
     <solid android:color="@color/white" />
 
     <!-- Especifica el radio de las esquinas -->
-    <corners android:radius="5dp" />
+    <corners android:radius="16dp" />
 
     <!-- Define un borde opcional alrededor del contenedor -->
     <stroke
         android:width="0.5pt"
         android:color="@color/principal" />
 
-    <!-- Añade margen opcional interno -->
-    <padding
-        android:left="8dp"
-        android:right="8dp"
-        android:top="10dp"
-        android:bottom="10dp" />
 </shape>

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">InstaModel</string>
-    <string name="welcome_message">Captura, entrena y clasifica tus imágenes de forma instantánea, todo desde tu dispositivo, sin necesidad de servidores ni conexiones externas.</string>
+    <string name="welcome_message">Comienza a crear tu propio modelo personalizado en pocos pasos.</string>
     <string name="data_capture_description">Registra videos de los objetos que quieres clasificar para crear clases personalizadas y entrenar el modelo.</string>
     <string name="training_description">Entrena tu modelo automáticamente con los videos capturados para que aprenda a reconocer los objetos definidos.</string>
     <string name="testing_description">Utiliza la cámara en tiempo real para probar el modelo y ver cómo clasifica los objetos que detecta.</string>

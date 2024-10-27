@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
+import com.example.learnme.config.GridConfig
 import com.example.learnme.fragments.ImageItem
 
 
@@ -19,7 +20,7 @@ class ImageGaleryActivity : ComponentActivity(){
 
         // Replace with actual image loading
         val imageList = listOf(
-            ImageItem(R.drawable.ic_launcher_background),
+            ImageItem(R.drawable.grid_10),
             ImageItem(R.drawable.ic_launcher_background),
             ImageItem(R.drawable.ic_launcher_background),
             ImageItem(R.drawable.ic_launcher_background),

@@ -1,94 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Cajas de texto -->
-    <style name="input_box">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">52dp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:outlineProvider">none</item>
-        <item name="android:inputType">text</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:background">@drawable/rounded_corners</item>
-    </style>
-
-    <!-- Botones negros -->
-    <style name="button_1" >
-        <item name="android:layout_width">150sp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:backgroundTint">@color/principal</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:background">@drawable/radius</item>
-        <item name="android:padding">15dp</item>
-    </style>
-
-    <style name="button_2" >
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:backgroundTint">@color/principal</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:background">@drawable/radius</item>
-        <item name="android:padding">15dp</item>
-    </style>
-
-    <!-- Descripciones -->
-    <style name="content_text">>
-        <item name="android:textSize">20sp</item>
-        <item name="android:textColor">@color/secundario_1</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:lineSpacingExtra">8dp</item>
-    </style>
-
-    <!-- Saludo personalizado -->
-    <style name="welcome_text">>
-        <item name="android:textSize">32sp</item>
-        <item name="android:textColor">@color/principal</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:lineSpacingExtra">8dp</item>
-    </style>
-
-    <!-- Titulo de pasos -->
-    <style name="step_title">>
-        <item name="android:textSize">32sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/principal</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:lineSpacingExtra">8dp</item>
-    </style>
-
-    <!-- Subtitulo de pasos -->
-    <style name="step_subtitle">>
-        <item name="android:textSize">20sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/principal</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:lineSpacingExtra">8dp</item>
-    </style>
-
-    <!-- Numero de paso  -->
-    <style name="step_number">>
-        <item name="android:textSize">80sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/principal</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:lineSpacingExtra">8dp</item>
-    </style>
-
-
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     </style>
@@ -109,6 +20,68 @@
         <item name="android:layout_margin">8dp</item>
         <item name="android:orientation">vertical</item>
         <item name="android:padding">10dp</item>
+    </style>
+
+
+    <!-- Titulos -->
+    <style name="Headline1">>
+        <item name="android:textSize">36.5sp</item>
+        <item name="android:textColor">@color/principal</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_bold</item>
+    </style>
+
+    <style name="Headline3">>
+        <item name="android:textSize">28.8sp</item>
+        <item name="android:textColor">@color/principal</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+    </style>
+
+    <style name="Headline5">>
+        <item name="android:textSize">22.8sp</item>
+        <item name="android:textColor">@color/principal</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+    </style>
+
+    <style name="Paragraph">>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/secundario_1</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/opensans_regular</item>
+    </style>
+
+    <!-- Boton -->
+    <style name="button_1" >
+        <item name="android:layout_width">170sp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:background">@drawable/btn_round</item>
+        <item name="android:padding">15dp</item>
+    </style>
+
+    <!-- Botones pequeño -->
+    <style name="button_2" >
+        <item name="android:layout_width">68dp</item>
+        <item name="android:layout_height">68dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:background">@drawable/img_round</item>
+        <item name="android:fontFamily">@font/inter_semibold</item>
+    </style>
+
+    <!-- Botones pequeño -->
+    <style name="button_3" >
+        <item name="android:layout_width">68dp</item>
+        <item name="android:layout_height">68dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/btn_round</item>
     </style>
 
 </resources>

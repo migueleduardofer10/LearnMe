@@ -1,25 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:paddingHorizontal="30dp"
+    android:paddingVertical="50dp">
 
-    <LinearLayout
+    <TextView
+        style="@style/Headline3"
+        android:id="@+id/nameTitleText"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_width="wrap_content"
+        android:text="Entorno de prueba" />
+
+    <ImageView
+        android:background="@drawable/rounded_corners"
+        android:layout_height="352dp"
+        android:layout_marginBottom="40dp"
+        android:contentDescription="Imagen de prueba"
+        android:layout_width="match_parent" />
+
+
+    <RelativeLayout
+        android:background="@drawable/rounded_corners"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingVertical="50dp"
-        android:paddingHorizontal="30dp">
+        android:padding="20dp">
 
-        <!-- REEMPLAZAR POR CAMARA -->
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="352dp"
-            android:background="@drawable/rounded_corners"
-            android:layout_marginBottom="40dp"/>
+        <LinearLayout
+            android:layout_centerVertical="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                style="@style/Headline5"
+                android:id="@+id/nameClass"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_width="wrap_content"
+                android:text="Clase 1" />
+
+            <TextView
+                style="@style/Paragraph"
+                android:id="@+id/precisionText"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Precisión: ¿?" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_alignParentEnd="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:background="@drawable/btn_round"
+                android:backgroundTint="@color/secundario_2"
+                android:contentDescription="Color de la clase"
+                android:layout_height="120dp"
+                android:layout_width="120dp" />
 
 
-</RelativeLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
