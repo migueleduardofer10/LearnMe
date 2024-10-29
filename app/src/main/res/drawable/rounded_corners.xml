@@ -10,7 +10,7 @@
 
     <!-- Define un borde opcional alrededor del contenedor -->
     <stroke
-        android:width="0.5pt"
-        android:color="@color/principal" />
+        android:width="1.5dp"
+        android:color="@color/secundario_2" />
 
 </shape>

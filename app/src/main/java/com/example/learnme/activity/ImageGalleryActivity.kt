@@ -13,15 +13,15 @@ import com.example.learnme.fragments.ImageItem
 
 class ImageGalleryActivity : ComponentActivity() {
 
-    private lateinit var galleryBinding: ActivityImageGaleryBinding
+    private lateinit var binding: ActivityImageGaleryBinding
 
     private lateinit var galleryHelper: GalleryHelper
     private lateinit var imageList: MutableList<ImageItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        galleryBinding = ActivityImageGaleryBinding.inflate(layoutInflater)
-        setContentView(galleryBinding.root)
+        binding = ActivityImageGaleryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         galleryHelper = GalleryHelper(this)
 
@@ -29,7 +29,7 @@ class ImageGalleryActivity : ComponentActivity() {
             imageList = galleryHelper.loadImagesFromGallery()
             val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
             GridConfig.setupGridWithAdapter(
-                recyclerView = galleryBinding.recyclerViewImages,
+                recyclerView = binding.recyclerViewImages,
                 context = this,
                 spanCount = 5,  // Número de columnas
                 spacing = spacing,
@@ -42,7 +42,7 @@ class ImageGalleryActivity : ComponentActivity() {
 
         permissionsManager.checkAndRequestPermission()
 
-        galleryBinding.backButton.setOnClickListener {
+        binding.backButton.setOnClickListener {
             finish()
             val intent = Intent(this, CaptureResumeActivity::class.java)
             startActivity(intent)

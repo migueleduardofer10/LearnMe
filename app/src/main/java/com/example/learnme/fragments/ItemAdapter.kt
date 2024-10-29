@@ -12,7 +12,10 @@ import com.example.learnme.R
 // Modelo de datos
 data class ItemClass(val title: String)
 
-class ItemAdapter(private val itemList: List<ItemClass>, private val itemClickListener: OnItemClickListener) :
+class ItemAdapter(
+    private val itemList: List<ItemClass>,
+    private val itemClickListener: OnItemClickListener
+) :
     RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
     // Interfaz para manejar los clics en los botones
@@ -30,7 +33,8 @@ class ItemAdapter(private val itemList: List<ItemClass>, private val itemClickLi
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_class, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_class, parent, false)
         return ItemViewHolder(itemView)
     }
 

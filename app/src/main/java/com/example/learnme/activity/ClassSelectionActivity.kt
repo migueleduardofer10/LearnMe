@@ -2,58 +2,78 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.fragments.ItemAdapter
 import com.example.learnme.fragments.ItemClass
-import com.example.learnme.R
+import com.example.learnme.databinding.ActivityClassSelectionBinding
 
 
 class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener{
+
+    private lateinit var binding: ActivityClassSelectionBinding
+
+    private lateinit var itemList: MutableList<ItemClass>
+    private lateinit var adapter: ItemAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_class_selection)
+
+        binding = ActivityClassSelectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Lista de datos de ejemplo
-        val itemList = listOf(
+        itemList = mutableListOf(
             ItemClass("Clase 1"),
-            ItemClass("Clase 2"),
-            ItemClass("Clase 3"),
-            ItemClass("Clase 4"),
-            ItemClass("Clase 5"),
+            ItemClass("Clase 2")
         )
 
         // Configurar el RecyclerView
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewItems)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = ItemAdapter(itemList, this)
+        binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
 
-        val nextButton = findViewById<Button>(R.id.nextButton)
+        adapter = ItemAdapter(itemList, this)
+        binding.recyclerViewItems.adapter = adapter
 
-        nextButton.setOnClickListener {
+
+        binding.nextButton.setOnClickListener {
             val intent = Intent(this, Step2Activity::class.java)
             startActivity(intent)
         }
 
-        // Botón para agregar una nueva clase
-        // val newClassButton = findViewById<Button>(R.id.newClassButton)
-
-
-
+        binding.newClassButton.setOnClickListener {
+            addNewClass()
+        }
     }
 
-    // Manejar clics en los botones
+    // Función para agregar una nueva clase
+    private fun addNewClass() {
+        // Crear un nuevo ItemClass con una descripción dinámica
+        val newClass = ItemClass("Clase ${itemList.size + 1}")
+
+        // Agregar la nueva clase a la lista
+        itemList.add(newClass)
+
+        // Notificar al adaptador que el dataset ha cambiado
+        adapter.notifyItemInserted(itemList.size - 1)
+    }
+
     override fun onBackClicked(position: Int) {
-        // Acción para el botón "Volver"
+        // Implementación temporal para mostrar un mensaje
+        val className = itemList[position].title
+        Toast.makeText(this, "Botón de volver para $className", Toast.LENGTH_SHORT).show()
     }
 
     override fun onUploadClicked(position: Int) {
-        // Acción para el botón "Subir"
+        // Implementación temporal para mostrar un mensaje
+        val className = itemList[position].title
+        Toast.makeText(this, "Botón de cargar para $className", Toast.LENGTH_SHORT).show()
     }
 
     override fun onEditClicked(position: Int) {
-        // Acción para el botón "Editar"
+        val selectedClass = itemList[position]
+        val intent = Intent(this, CaptureResumeActivity::class.java)
+        intent.putExtra("class", selectedClass.title)
+        startActivity(intent)
     }
 }

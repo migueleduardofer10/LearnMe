@@ -10,12 +10,13 @@ import com.example.learnme.R
 
 // Data class to represent each image item
 data class ImageItem(
-    val imagePath: String,
+    val imagePath: String, // Cambiado a String para manejar rutas de archivos
+    val classId: Int,  // Identificador para asociar la imagen con una clase específica
     var isSelected: Boolean = false
-) // Cambiado a String para manejar rutas de archivos
+)
 
 class ImageAdapter(
-    private val imageList: List<ImageItem>,  // Lista de imágenes a mostrar
+    private var imageList: List<ImageItem>,  // Lista de imágenes a mostrar
     private val onItemClick: (ImageItem) -> Unit  // Evento para manejar clics en la imagen
 ) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
@@ -52,4 +53,10 @@ class ImageAdapter(
 
     // Devolver el tamaño de la lista
     override fun getItemCount(): Int = imageList.size
+
+    // Filtrar imágenes por classId
+    fun filterImagesByClass(classId: Int) {
+        imageList = imageList.filter { it.classId == classId }
+        notifyDataSetChanged()
+    }
 }
