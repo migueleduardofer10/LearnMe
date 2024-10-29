@@ -22,7 +22,7 @@ class GalleryHelper(private val context: Context) {
             val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             while (it.moveToNext()) {
                 val imagePath = it.getString(columnIndex)
-                imageList.add(ImageItem(imagePath))
+                imageList.add(ImageItem(imagePath,2))
             }
         }
         return imageList

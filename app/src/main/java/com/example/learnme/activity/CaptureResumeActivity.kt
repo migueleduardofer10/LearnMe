@@ -2,50 +2,46 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.ComponentActivity
-import androidx.recyclerview.widget.RecyclerView
-import com.example.learnme.R
-import com.example.learnme.config.GridConfig
+import com.example.learnme.databinding.ActivityCaptureResumeBinding
+import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
 
-//Creo que se debe definir como Clase recursiva
-
 class CaptureResumeActivity : ComponentActivity(){
+
+    private lateinit var binding: ActivityCaptureResumeBinding
+    private lateinit var imageAdapter: ImageAdapter
+    private lateinit var classPosition: String
+    private var imageList: MutableList<ImageItem> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_capture_resume)
 
-        // Find RecyclerView
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewImages)
+        binding = ActivityCaptureResumeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Replace with actual image loading
-        val imageList = null
+        // Obtener el nombre de la clase desde el Intent
+        classPosition = intent.getStringExtra("class") ?: "Clase"
 
-//        // Configurar el grid con 3 columnas, espaciado y pasar la lista de imágenes
-//        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
-//        GridConfig.setupGridWithAdapter(recyclerView, this, spanCount = 5, spacing = spacing, imageList = imageList)
-//
+        // Configurar el título de la actividad
+        binding.nameEditText.text = classPosition
 
-        val backButton = findViewById<Button>(R.id.backButton)
-        // val uploadButton = findViewById<Button>(R.id.uploadButton)
-        val cameraButton = findViewById<Button>(R.id.cameraButton)
 
-        cameraButton.setOnClickListener {
+        binding.cameraButton.setOnClickListener {
             val intent = Intent(this, DataCaptureActivity::class.java)
             startActivity(intent)
         }
 
         /*
-        uploadButton.setOnClickListener {
+        binding.uploadButton.setOnClickListener {
             val intent = Intent(this, ClassSelectionActivity::class.java)
             startActivity(intent)
         }
         */
 
-        backButton.setOnClickListener {
-            val intent = Intent(this, ClassSelectionActivity::class.java)
-            startActivity(intent)
+        binding.backButton.setOnClickListener {
+            finish()
         }
     }
+
 }
