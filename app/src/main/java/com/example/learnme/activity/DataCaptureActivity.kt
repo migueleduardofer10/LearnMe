@@ -159,19 +159,32 @@ class DataCaptureActivity : ComponentActivity() {
         val sharedPreferences = getSharedPreferences("CapturedImages", MODE_PRIVATE)
         val imagePaths = sharedPreferences.getStringSet("imagePaths", mutableSetOf())
 
+        val tempImageList = mutableListOf<ImageItem>()
+
         imagePaths?.forEach { entry ->
             // Separar la entrada en "ruta" y "classId" usando el delimitador "|"
             val parts = entry.split("|")
             if (parts.size == 2) {
                 val path = parts[0]
-                val classId = parts[1].toIntOrNull() ?: 0  // Convertir classId a entero, usar 0 si es inválido
-                imageList.add(ImageItem(path, classId))
+                val savedClassId = parts[1].toIntOrNull() ?: 0
+                if (savedClassId == classId) {
+                    tempImageList.add(ImageItem(path, savedClassId))
+                }
             }
         }
+
+        // Ordenar la lista de imágenes por el timestamp en el nombre del archivo
+        imageList.clear()
+        imageList.addAll(
+            tempImageList.sortedBy { imageItem ->
+                File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
+            }
+        )
 
         // Notificar al adaptador que los datos han cambiado
         adapter.notifyDataSetChanged()
     }
+
 
     private fun saveImagePath(imagePath: String, classId: Int) {
         val sharedPreferences = getSharedPreferences("CapturedImages", MODE_PRIVATE)
