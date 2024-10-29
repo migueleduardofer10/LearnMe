@@ -10,6 +10,7 @@ import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.fragments.GridSpacingItemDecoration
 import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
+import java.io.File
 
 class CaptureResumeActivity : ComponentActivity() {
 
@@ -66,18 +67,29 @@ class CaptureResumeActivity : ComponentActivity() {
         val sharedPreferences = getSharedPreferences("CapturedImages", MODE_PRIVATE)
         val imagePaths = sharedPreferences.getStringSet("imagePaths", mutableSetOf())
 
+        val tempImageList = mutableListOf<ImageItem>()
+
         imagePaths?.forEach { entry ->
             val parts = entry.split("|")
             if (parts.size == 2) {
                 val path = parts[0]
                 val savedClassId = parts[1].toIntOrNull() ?: -1
                 if (savedClassId == classId) { // Filtrar por classId
-                    imageList.add(ImageItem(path, savedClassId))
+                    tempImageList.add(ImageItem(path, savedClassId))
                 }
             }
         }
 
+        // Ordenar la lista de imágenes por el timestamp en el nombre del archivo
+        imageList.clear()
+        imageList.addAll(
+            tempImageList.sortedBy { imageItem ->
+                File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
+            }
+        )
+
         // Notificar al adaptador que los datos han cambiado
         imageAdapter.notifyDataSetChanged()
     }
+
 }
