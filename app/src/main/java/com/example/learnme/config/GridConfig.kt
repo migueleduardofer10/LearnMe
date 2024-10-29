@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.fragments.GridSpacingItemDecoration
-import com.example.learnme.fragments.ImageGridAdapter
+import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
 
 object GridConfig {
@@ -22,7 +22,8 @@ object GridConfig {
         context: Context,
         spanCount: Int,
         spacing: Int,
-        imageList: List<ImageItem>
+        imageList: MutableList<ImageItem>,
+        onItemClick: (ImageItem) -> Unit
     ) {
         // Configura el LayoutManager con el número de columnas
         recyclerView.layoutManager = GridLayoutManager(context, spanCount)
@@ -31,7 +32,6 @@ object GridConfig {
         recyclerView.addItemDecoration(GridSpacingItemDecoration(spanCount, spacing))
 
         // Configura el adaptador
-        val adapter = ImageGridAdapter(imageList)
-        recyclerView.adapter = adapter
+        recyclerView.adapter = ImageAdapter(imageList, onItemClick)
     }
 }

@@ -18,21 +18,21 @@ class DataCaptureActivity : ComponentActivity(){
         // Find RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewImages)
 
-        // Replace with actual image loading
-        val imageList = listOf(
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-            ImageItem(R.drawable.ic_launcher_background),
-        )
-
-        // Configurar el grid con 3 columnas, espaciado y pasar la lista de imágenes
-        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
-        GridConfig.setupGridWithAdapter(recyclerView, this, spanCount = 5, spacing = spacing, imageList = imageList)
-
+//        // Replace with actual image loading
+//        val imageList = listOf(
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//            ImageItem(R.drawable.ic_launcher_background),
+//        )
+//
+//        // Configurar el grid con 3 columnas, espaciado y pasar la lista de imágenes
+//        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
+//        GridConfig.setupGridWithAdapter(recyclerView, this, spanCount = 5, spacing = spacing, imageList = imageList)
+//
 
         val backButton = findViewById<Button>(R.id.backButton)
 
