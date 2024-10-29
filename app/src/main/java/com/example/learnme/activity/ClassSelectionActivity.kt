@@ -72,8 +72,9 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onEditClicked(position: Int) {
         val selectedClass = itemList[position]
-        val intent = Intent(this, CaptureResumeActivity::class.java)
-        intent.putExtra("class", selectedClass.title)
+        val intent = Intent(this, DataCaptureActivity::class.java)
+        intent.putExtra("classId", position) // Envía el índice como classId
         startActivity(intent)
     }
+
 }
