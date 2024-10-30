@@ -2,12 +2,11 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.R
+import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
-import com.example.learnme.fragments.GridSpacingItemDecoration
 import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
 import java.io.File
@@ -15,10 +14,11 @@ import java.io.File
 class CaptureResumeActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityCaptureResumeBinding
-    private lateinit var imageAdapter: ImageAdapter
-    private var classPosition: String = "Clase"
-    private var classId: Int = -1 // Inicializa classId con un valor por defecto
+    private lateinit var adapter: ImageAdapter
+    private lateinit var classPosition: String
+    private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
+    private var isSelectionMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,39 +26,53 @@ class CaptureResumeActivity : ComponentActivity() {
         binding = ActivityCaptureResumeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtener el nombre de la clase y el classId desde el Intent
+        // Obtener el nombre de la clase desde el Intent
         classPosition = intent.getStringExtra("class") ?: "Clase"
         classId = intent.getIntExtra("classId", -1)
 
-        // Configurar el título de la actividad
-        binding.nameEditText.text = classPosition
-
-        // Configurar el RecyclerView como una cuadrícula
-        imageAdapter = ImageAdapter(imageList) { imageItem ->
-            // Implementar lógica de clic en la imagen, si es necesario
-        }
-
-        val spanCount = 3 // Número de columnas en la cuadrícula
-        binding.recyclerViewImages.layoutManager = GridLayoutManager(this, spanCount)
-
-        // Agregar espaciado entre los elementos de la cuadrícula
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
-        binding.recyclerViewImages.addItemDecoration(GridSpacingItemDecoration(spanCount, spacing))
+        adapter = GridConfig.setupGridWithAdapter(
+            recyclerView = binding.recyclerViewImages,
+            context = this,
+            spanCount = 5,
+            spacing = spacing,
+            imageList = imageList,
+            onItemClick = { imageItem ->
+                toggleSelection(imageItem)
+            }
+        )
 
-        binding.recyclerViewImages.adapter = imageAdapter
 
         // Cargar imágenes asociadas al classId
         loadImagesForClass()
 
-        // Configurar botones
+        // Botón para abrir la cámara
         binding.cameraButton.setOnClickListener {
             val intent = Intent(this, DataCaptureActivity::class.java)
-            intent.putExtra("classId", classId) // Pasar classId a DataCaptureActivity
+            intent.putExtra("classId", classId)
             startActivity(intent)
         }
 
+        // Botón para activar el modo de selección
+        binding.hamburgerButton.setOnClickListener {
+            enterSelectionMode()
+        }
+
+        // Botón para eliminar imágenes seleccionadas
+        binding.deleteButton.setOnClickListener {
+            deleteSelectedImages()
+        }
+
+        // Botón para cancelar el modo de selección
+        binding.cancelButton.setOnClickListener {
+            exitSelectionMode()
+        }
+
+        // Botón para regresar a la actividad anterior
         binding.backButton.setOnClickListener {
-            finish()
+            val intent = Intent(this, ClassSelectionActivity::class.java)
+            intent.putExtra("classId", classId)
+            startActivity(intent)
         }
     }
 
@@ -89,7 +103,45 @@ class CaptureResumeActivity : ComponentActivity() {
         )
 
         // Notificar al adaptador que los datos han cambiado
-        imageAdapter.notifyDataSetChanged()
+        adapter.notifyDataSetChanged()
     }
 
+    private fun toggleSelection(imageItem: ImageItem) {
+        if (isSelectionMode) {
+            imageItem.isSelected = !imageItem.isSelected
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun enterSelectionMode() {
+        isSelectionMode = true
+        adapter.isSelectionMode = true
+        updateUIForSelectionMode()
+    }
+
+    private fun exitSelectionMode() {
+        isSelectionMode = false
+        adapter.isSelectionMode = false
+        adapter.clearSelection()
+        updateUIForNormalMode()
+    }
+
+    private fun deleteSelectedImages() {
+        adapter.deleteSelectedImages()
+        exitSelectionMode()
+    }
+
+    private fun updateUIForSelectionMode() {
+        binding.fileCountTextView.text = "Seleccionar"
+        binding.hamburgerButton.visibility = View.GONE
+        binding.deleteButton.visibility = View.VISIBLE
+        binding.cancelButton.visibility = View.VISIBLE
+    }
+
+    private fun updateUIForNormalMode() {
+        binding.fileCountTextView.text = "Imágenes capturadas"
+        binding.hamburgerButton.visibility = View.VISIBLE
+        binding.deleteButton.visibility = View.GONE
+        binding.cancelButton.visibility = View.GONE
+    }
 }

@@ -58,10 +58,12 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         adapter.notifyItemInserted(itemList.size - 1)
     }
 
-    override fun onBackClicked(position: Int) {
-        // Implementación temporal para mostrar un mensaje
-        val className = itemList[position].title
-        Toast.makeText(this, "Botón de volver para $className", Toast.LENGTH_SHORT).show()
+    override fun onCameraClicked(position: Int) {
+        val selectedClass = itemList[position]
+        val intent = Intent(this, DataCaptureActivity::class.java)
+        intent.putExtra("class", selectedClass.title)
+        intent.putExtra("classId", position)
+        startActivity(intent)
     }
 
     override fun onUploadClicked(position: Int) {
@@ -72,9 +74,9 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onEditClicked(position: Int) {
         val selectedClass = itemList[position]
-        val intent = Intent(this, DataCaptureActivity::class.java)
-        intent.putExtra("classId", position) // Envía el índice como classId
+        val intent = Intent(this, CaptureResumeActivity::class.java)
+        intent.putExtra("class", selectedClass.title)
+        intent.putExtra("classId", position)
         startActivity(intent)
     }
-
 }

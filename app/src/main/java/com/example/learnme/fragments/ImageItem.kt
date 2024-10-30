@@ -12,24 +12,28 @@ import com.example.learnme.R
 data class ImageItem(
     val imagePath: String, // Cambiado a String para manejar rutas de archivos
     val classId: Int,  // Identificador para asociar la imagen con una clase específica
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false // Indicador de selección para el modo de selección múltiple
 )
 
 class ImageAdapter(
-    private var imageList: List<ImageItem>,  // Lista de imágenes a mostrar
+    private var imageList: MutableList<ImageItem>,  // Lista de imágenes a mostrar
     private val onItemClick: (ImageItem) -> Unit  // Evento para manejar clics en la imagen
 ) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
 
+    var isSelectionMode = false  // Controla si el adaptador está en modo de selección múltiple
+    private val selectedImages = mutableSetOf<ImageItem>() // Almacena las imágenes seleccionadas
+
+
     // ViewHolder que contiene la vista de cada imagen individual
     class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val imageView: ImageView =
-            view.findViewById(R.id.imageView)  // ID de ImageView en el layout de ítem
+        val imageView: ImageView = view.findViewById(R.id.imageView)
     }
+
 
     // Crear nuevos ViewHolders
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_image, parent, false)  // Infla el layout de cada ítem
+            .inflate(R.layout.item_image, parent, false)
         return ImageViewHolder(view)
     }
 
@@ -39,16 +43,45 @@ class ImageAdapter(
 
         // Usar Glide o similar para cargar la imagen desde el path
         Glide.with(holder.imageView.context)
-            .load(imageItem.imagePath)  // Cargar la imagen de la ruta
+            .load(imageItem.imagePath)
             .into(holder.imageView)
 
+        // Cambiar la opacidad de la imagen según el estado de selección
         holder.imageView.alpha = if (imageItem.isSelected) 0.5f else 1.0f
 
         // Configurar un clic para manejar la selección de imágenes
         holder.imageView.setOnClickListener {
-            onItemClick(imageItem)
+            if (isSelectionMode) {
+                toggleSelection(imageItem)
+            } else {
+                onItemClick(imageItem)
+            }
             notifyItemChanged(position)
         }
+    }
+
+    // Alternar la selección de una imagen
+    private fun toggleSelection(imageItem: ImageItem) {
+        imageItem.isSelected = !imageItem.isSelected
+        if (imageItem.isSelected) {
+            selectedImages.add(imageItem)
+        } else {
+            selectedImages.remove(imageItem)
+        }
+    }
+
+    // Método para limpiar todas las selecciones
+    fun clearSelection() {
+        selectedImages.forEach { it.isSelected = false }
+        selectedImages.clear()
+        notifyDataSetChanged()
+    }
+
+    // Método para eliminar las imágenes seleccionadas
+    fun deleteSelectedImages() {
+        imageList.removeAll(selectedImages)
+        selectedImages.clear()
+        notifyDataSetChanged()
     }
 
     // Devolver el tamaño de la lista
@@ -56,7 +89,7 @@ class ImageAdapter(
 
     // Filtrar imágenes por classId
     fun filterImagesByClass(classId: Int) {
-        imageList = imageList.filter { it.classId == classId }
+        imageList = imageList.filter { it.classId == classId }.toMutableList()
         notifyDataSetChanged()
     }
 }

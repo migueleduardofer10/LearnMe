@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -15,31 +14,6 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp">
-
-            <TextView
-                android:id="@+id/nameEditText"
-                style="@style/Headline3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Clase 1" />
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="@android:color/transparent"
-                android:contentDescription="Botón con ícono de editar"
-                android:padding="5dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_edit_40px" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginBottom="12dp">
 
             <TextView
@@ -50,26 +24,56 @@
                 android:layout_centerVertical="true"
                 android:text="Imágenes capturadas" />
 
+            <!-- Botón de menú para activar el modo de selección -->
             <ImageButton
+                android:id="@+id/hamburgerButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
-                android:contentDescription="Botón con ícono de menú"
+                android:contentDescription="Activar selección"
                 android:padding="5dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_menu_40px" />
+                android:src="@drawable/ic_menu_40px"
+                android:visibility="visible" />
+
+            <!-- Botón de eliminar, visible en modo de selección -->
+            <ImageButton
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Eliminar"
+                android:padding="5dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_delete_40px"
+                android:visibility="gone" />
+
+            <!-- Botón de cancelar, visible en modo de selección -->
+            <ImageButton
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/deleteButton"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Cancelar selección"
+                android:padding="5dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_cancel_40px"
+                android:visibility="gone" />
 
         </RelativeLayout>
 
+        <!-- RecyclerView para mostrar las imágenes capturadas -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewImages"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="-2dp"
             android:scrollbars="vertical" />
-
     </LinearLayout>
 
     <RelativeLayout
