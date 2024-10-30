@@ -20,7 +20,7 @@ class ItemAdapter(
 
     // Interfaz para manejar los clics en los botones
     interface OnItemClickListener {
-        fun onBackClicked(position: Int)
+        fun onCameraClicked(position: Int)
         fun onUploadClicked(position: Int)
         fun onEditClicked(position: Int)
     }
@@ -46,7 +46,7 @@ class ItemAdapter(
 
         // Asignar listeners a los botones
         holder.cameraButton.setOnClickListener {
-            itemClickListener.onBackClicked(position)
+            itemClickListener.onCameraClicked(position)
         }
         holder.uploadButton.setOnClickListener {
             itemClickListener.onUploadClicked(position)

@@ -8,6 +8,7 @@ import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityImageGaleryBinding
 import com.example.learnme.fragments.GalleryPermissionsManager
 import com.example.learnme.fragments.GalleryHelper
+import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
 
 
@@ -17,6 +18,8 @@ class ImageGalleryActivity : ComponentActivity() {
 
     private lateinit var galleryHelper: GalleryHelper
     private lateinit var imageList: MutableList<ImageItem>
+    private lateinit var adapter: ImageAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +31,7 @@ class ImageGalleryActivity : ComponentActivity() {
         val permissionsManager = GalleryPermissionsManager(this) {
             imageList = galleryHelper.loadImagesFromGallery()
             val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
-            GridConfig.setupGridWithAdapter(
+            adapter = GridConfig.setupGridWithAdapter(
                 recyclerView = binding.recyclerViewImages,
                 context = this,
                 spanCount = 5,  // Número de columnas

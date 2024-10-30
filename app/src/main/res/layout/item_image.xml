@@ -1,9 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_weight="1">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/imageView"
@@ -11,5 +8,23 @@
         android:layout_height="100dp"
         android:scaleType="centerCrop"
         android:background="@drawable/img_grid_round"
-        android:clipToOutline="true"/>
+        android:clipToOutline="true" />
+
+    <!-- Fondo gris oscuro para la selección -->
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray"
+        android:alpha="0.5"
+        android:visibility="gone" />
+
+    <!-- Ícono de check para indicar selección -->
+    <ImageView
+        android:id="@+id/checkmark"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_check_40px"
+        android:visibility="gone" />
 </FrameLayout>
