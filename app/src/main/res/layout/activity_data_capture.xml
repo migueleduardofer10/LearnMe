@@ -20,6 +20,12 @@
             android:layout_marginBottom="16dp"
             android:text="Cámara" />
 
+        <androidx.camera.view.PreviewView
+            android:id="@+id/previewView"
+            android:layout_width="match_parent"
+            android:layout_height="352dp"
+            android:layout_marginBottom="40dp"/>
+
 
         <RelativeLayout
             android:layout_width="match_parent"
