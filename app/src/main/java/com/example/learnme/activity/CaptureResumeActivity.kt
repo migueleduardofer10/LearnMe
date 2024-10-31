@@ -2,6 +2,7 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
@@ -10,13 +11,14 @@ import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
 import java.io.File
 
-class CaptureResumeActivity : ComponentActivity(){
+class CaptureResumeActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityCaptureResumeBinding
     private lateinit var adapter: ImageAdapter
     private lateinit var classPosition: String
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
+    private var isSelectionMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,12 +38,9 @@ class CaptureResumeActivity : ComponentActivity(){
             spacing = spacing,
             imageList = imageList,
             onItemClick = { imageItem ->
-                // Implementar lógica de eliminación o cualquier otra acción necesaria
+                toggleSelection(imageItem)
             }
         )
-
-        // Configurar el título de la actividad
-        binding.nameEditText.text = classPosition
 
         // Cargar imágenes asociadas al classId
         loadImagesForClass()
@@ -53,13 +52,22 @@ class CaptureResumeActivity : ComponentActivity(){
             startActivity(intent)
         }
 
-        /*
-        binding.uploadButton.setOnClickListener {
-            val intent = Intent(this, ClassSelectionActivity::class.java)
-            startActivity(intent)
+        // Botón para activar el modo de selección
+        binding.hamburgerButton.setOnClickListener {
+            enterSelectionMode()
         }
-        */
 
+        // Botón para eliminar imágenes seleccionadas
+        binding.deleteButton.setOnClickListener {
+            deleteSelectedImages()
+        }
+
+        // Botón para cancelar el modo de selección
+        binding.cancelButton.setOnClickListener {
+            exitSelectionMode()
+        }
+
+        // Botón para regresar a la actividad anterior
         binding.backButton.setOnClickListener {
             val intent = Intent(this, ClassSelectionActivity::class.java)
             intent.putExtra("classId", classId)
@@ -97,4 +105,42 @@ class CaptureResumeActivity : ComponentActivity(){
         adapter.notifyDataSetChanged()
     }
 
+    private fun toggleSelection(imageItem: ImageItem) {
+        if (isSelectionMode) {
+            imageItem.isSelected = !imageItem.isSelected
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun enterSelectionMode() {
+        isSelectionMode = true
+        adapter.isSelectionMode = true
+        updateUIForSelectionMode()
+    }
+
+    private fun exitSelectionMode() {
+        isSelectionMode = false
+        adapter.isSelectionMode = false
+        adapter.clearSelection()
+        updateUIForNormalMode()
+    }
+
+    private fun deleteSelectedImages() {
+        adapter.deleteSelectedImages()
+        exitSelectionMode()
+    }
+
+    private fun updateUIForSelectionMode() {
+        binding.fileCountTextView.text = "Seleccionar"
+        binding.hamburgerButton.visibility = View.GONE
+        binding.deleteButton.visibility = View.VISIBLE
+        binding.cancelButton.visibility = View.VISIBLE
+    }
+
+    private fun updateUIForNormalMode() {
+        binding.fileCountTextView.text = "Imágenes capturadas"
+        binding.hamburgerButton.visibility = View.VISIBLE
+        binding.deleteButton.visibility = View.GONE
+        binding.cancelButton.visibility = View.GONE
+    }
 }
