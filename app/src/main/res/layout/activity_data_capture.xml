@@ -51,7 +51,7 @@
                 android:contentDescription="Botón con ícono de menú"
                 android:padding="5dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_menu_40px" />
+                android:src="@drawable/ic_menu_28px" />
 
         </RelativeLayout>
 
