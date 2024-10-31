@@ -15,7 +15,6 @@ class CaptureResumeActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityCaptureResumeBinding
     private lateinit var adapter: ImageAdapter
-    private lateinit var classPosition: String
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
@@ -27,8 +26,9 @@ class CaptureResumeActivity : ComponentActivity() {
         setContentView(binding.root)
 
         // Obtener el nombre de la clase desde el Intent
-        classPosition = intent.getStringExtra("class") ?: "Clase"
         classId = intent.getIntExtra("classId", -1)
+        val className = "Clase ${classId + 1}"
+
 
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         adapter = GridConfig.setupGridWithAdapter(
@@ -42,12 +42,20 @@ class CaptureResumeActivity : ComponentActivity() {
             }
         )
 
+        binding.nameEditText.text = className
+
         // Cargar imágenes asociadas al classId
         loadImagesForClass()
 
 
         binding.cameraButton.setOnClickListener {
             val intent = Intent(this, DataCaptureActivity::class.java)
+            intent.putExtra("classId", classId)
+            startActivity(intent)
+        }
+
+        binding.uploadButton.setOnClickListener {
+            val intent = Intent(this, ImageGalleryActivity::class.java)
             intent.putExtra("classId", classId)
             startActivity(intent)
         }

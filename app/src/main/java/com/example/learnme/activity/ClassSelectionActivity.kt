@@ -89,15 +89,15 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         startActivity(intent)
     }
     override fun onUploadClicked(position: Int) {
-        // Implementación temporal para mostrar un mensaje
-        val className = itemList[position].title
-        Toast.makeText(this, "Botón de cargar para $className", Toast.LENGTH_SHORT).show()
+        val selectedClass = itemList[position]
+        val intent = Intent(this, ImageGalleryActivity::class.java)
+        intent.putExtra("class", selectedClass.title)
+        intent.putExtra("classId", position)
+        startActivity(intent)
     }
 
     override fun onEditClicked(position: Int) {
-        val selectedClass = itemList[position]
         val intent = Intent(this, CaptureResumeActivity::class.java)
-        intent.putExtra("class", selectedClass.title)
         intent.putExtra("classId", position)
         startActivity(intent)
     }
