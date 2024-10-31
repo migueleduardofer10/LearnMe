@@ -13,10 +13,10 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="ClassSelectionActivity">
+      <SelectionState runConfigName="CaptureResumeActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ImageGaleryActivity">
+      <SelectionState runConfigName="ClassSelectionActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
