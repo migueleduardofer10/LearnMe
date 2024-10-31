@@ -16,7 +16,7 @@ class Step2Activity : ComponentActivity() {
         val backButton = findViewById<Button>(R.id.backButton)
 
         backButton.setOnClickListener {
-            val intent = Intent(this, Step1Activity::class.java)
+            val intent = Intent(this, ClassSelectionActivity::class.java)
             startActivity(intent)
         }
 

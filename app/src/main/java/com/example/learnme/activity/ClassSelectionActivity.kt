@@ -3,7 +3,6 @@ package com.example.learnme.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.fragments.ItemAdapter
@@ -68,7 +67,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     // Función para cargar la lista de clases desde SharedPreferences
     private fun loadClassesFromPreferences(): MutableList<ItemClass> {
-        val sharedPreferences = getSharedPreferences("ClassPreferences", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("ClassPreferences", MODE_PRIVATE)
         val gson = Gson()
         val json = sharedPreferences.getString("classList", null)
         val type = object : TypeToken<MutableList<ItemClass>>() {}.type
