@@ -28,4 +28,8 @@ interface ImageDao {
 
     @Delete
     fun deleteImage(image: ImageEntity)
+
+    // Alternativa: agregar un método de borrado basado en el path o el ID
+    @Query("DELETE FROM images WHERE image_path = :imagePath")
+    fun deleteImageByPath(imagePath: String)
 }

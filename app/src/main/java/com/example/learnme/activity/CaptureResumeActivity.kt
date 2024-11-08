@@ -138,7 +138,7 @@ class CaptureResumeActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val selectedImages = imageList.filter { it.isSelected }
             selectedImages.forEach { imageItem ->
-                imageDao.deleteImage(ImageEntity(imagePath = imageItem.imagePath, classId = imageItem.classId))
+                imageDao.deleteImageByPath(imageItem.imagePath)
             }
 
             withContext(Dispatchers.Main) {
@@ -162,4 +162,5 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.deleteButton.visibility = View.GONE
         binding.cancelButton.visibility = View.GONE
     }
+
 }
