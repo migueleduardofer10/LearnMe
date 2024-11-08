@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.example.learnme.AppDatabase
+import com.example.learnme.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityImageGaleryBinding
@@ -11,16 +13,19 @@ import com.example.learnme.fragments.GalleryPermissionsManager
 import com.example.learnme.fragments.GalleryHelper
 import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class ImageGalleryActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityImageGaleryBinding
-
     private lateinit var galleryHelper: GalleryHelper
     private lateinit var imageList: MutableList<ImageItem>
     private lateinit var adapter: ImageAdapter
     private var classId: Int = -1  // Valor por defecto en caso de que no se reciba
+    private lateinit var database: AppDatabase // Base de datos para almacenar las imágenes
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +37,7 @@ class ImageGalleryActivity : ComponentActivity() {
         classId = intent.getIntExtra("classId", -1)  // -1 es un valor por defecto
 
         galleryHelper = GalleryHelper(this)
+        database = AppDatabase.getInstance(this) // Inicializa la base de datos
 
         val permissionsManager = GalleryPermissionsManager(this) {
             imageList = galleryHelper.loadImagesFromGallery()
@@ -73,20 +79,19 @@ class ImageGalleryActivity : ComponentActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    // Guardar imágenes seleccionadas en SharedPreferences
+    // Guardar imágenes seleccionadas en la base de datos
     private fun saveSelectedImages() {
         val selectedImages = imageList.filter { it.isSelected }
-        val sharedPreferences = getSharedPreferences("CapturedImages", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
 
-        val existingPaths = sharedPreferences.getStringSet("imagePaths", mutableSetOf()) ?: mutableSetOf()
-
-        // Agregar las imágenes seleccionadas con el formato "ruta|classId"
-        selectedImages.forEach { imageItem ->
-            existingPaths.add("${imageItem.imagePath}|$classId")
+        // Ejecutar la inserción en un hilo de fondo
+        CoroutineScope(Dispatchers.IO).launch {
+            selectedImages.forEach { imageItem ->
+                val imageEntity = ImageEntity(
+                    imagePath = imageItem.imagePath,
+                    classId = classId
+                )
+                database.imageDao().insertImage(imageEntity)  // Inserta la imagen en la base de datos
+            }
         }
-
-        editor.putStringSet("imagePaths", existingPaths)
-        editor.apply()
     }
 }
