@@ -4,11 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
+import com.example.learnme.AppDatabase
+import com.example.learnme.ImageDao
+import com.example.learnme.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.fragments.ImageAdapter
 import com.example.learnme.fragments.ImageItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class CaptureResumeActivity : ComponentActivity() {
@@ -19,17 +26,25 @@ class CaptureResumeActivity : ComponentActivity() {
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
 
+    private lateinit var database: AppDatabase
+    private lateinit var imageDao: ImageDao
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityCaptureResumeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Configurar la base de datos y el DAO
+        database = AppDatabase.getInstance(this)
+        imageDao = database.imageDao()
+
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
-        val className = "Clase ${classId + 1}"
+        val className = "Clase $classId"
+        binding.nameEditText.text = className
 
-
+        // Configurar el RecyclerView
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         adapter = GridConfig.setupGridWithAdapter(
             recyclerView = binding.recyclerViewImages,
@@ -42,9 +57,7 @@ class CaptureResumeActivity : ComponentActivity() {
             }
         )
 
-        binding.nameEditText.text = className
-
-        // Cargar imágenes asociadas al classId
+        // Cargar imágenes desde la base de datos
         loadImagesForClass()
 
 
@@ -83,34 +96,22 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-    // Método para cargar las imágenes de SharedPreferences que coincidan con el classId
+    // Cargar imágenes asociadas al classId desde la base de datos
     private fun loadImagesForClass() {
-        val sharedPreferences = getSharedPreferences("CapturedImages", MODE_PRIVATE)
-        val imagePaths = sharedPreferences.getStringSet("imagePaths", mutableSetOf())
+        CoroutineScope(Dispatchers.IO).launch {
+            val images = imageDao.getImagesForClass(classId)
+            val tempImageList = images.map { ImageItem(it.imagePath, it.classId) }
 
-        val tempImageList = mutableListOf<ImageItem>()
-
-        imagePaths?.forEach { entry ->
-            val parts = entry.split("|")
-            if (parts.size == 2) {
-                val path = parts[0]
-                val savedClassId = parts[1].toIntOrNull() ?: -1
-                if (savedClassId == classId) { // Filtrar por classId
-                    tempImageList.add(ImageItem(path, savedClassId))
-                }
+            withContext(Dispatchers.Main) {
+                imageList.clear()
+                imageList.addAll(
+                    tempImageList.sortedBy { imageItem ->
+                        File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
+                    }
+                )
+                adapter.notifyDataSetChanged()
             }
         }
-
-        // Ordenar la lista de imágenes por el timestamp en el nombre del archivo
-        imageList.clear()
-        imageList.addAll(
-            tempImageList.sortedBy { imageItem ->
-                File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
-            }
-        )
-
-        // Notificar al adaptador que los datos han cambiado
-        adapter.notifyDataSetChanged()
     }
 
     private fun toggleSelection(imageItem: ImageItem) {
@@ -134,8 +135,18 @@ class CaptureResumeActivity : ComponentActivity() {
     }
 
     private fun deleteSelectedImages() {
-        adapter.deleteSelectedImages()
-        exitSelectionMode()
+        CoroutineScope(Dispatchers.IO).launch {
+            val selectedImages = imageList.filter { it.isSelected }
+            selectedImages.forEach { imageItem ->
+                imageDao.deleteImage(ImageEntity(imagePath = imageItem.imagePath, classId = imageItem.classId))
+            }
+
+            withContext(Dispatchers.Main) {
+                imageList.removeAll(selectedImages)
+                adapter.notifyDataSetChanged()
+                exitSelectionMode()
+            }
+        }
     }
 
     private fun updateUIForSelectionMode() {

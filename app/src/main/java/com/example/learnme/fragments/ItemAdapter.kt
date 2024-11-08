@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
 
 // Modelo de datos
-data class ItemClass(val title: String)
+data class ItemClass(val title: String, val classId: Int)
 
 class ItemAdapter(
     private val itemList: List<ItemClass>,
@@ -20,9 +20,9 @@ class ItemAdapter(
 
     // Interfaz para manejar los clics en los botones
     interface OnItemClickListener {
-        fun onCameraClicked(position: Int)
-        fun onUploadClicked(position: Int)
-        fun onEditClicked(position: Int)
+        fun onCameraClicked(classId: Int)
+        fun onUploadClicked(classId: Int)
+        fun onEditClicked(classId: Int)
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -46,14 +46,15 @@ class ItemAdapter(
 
         // Asignar listeners a los botones
         holder.cameraButton.setOnClickListener {
-            itemClickListener.onCameraClicked(position)
+            itemClickListener.onCameraClicked(currentItem.classId)
         }
         holder.uploadButton.setOnClickListener {
-            itemClickListener.onUploadClicked(position)
+            itemClickListener.onUploadClicked(currentItem.classId)
         }
         holder.editButton.setOnClickListener {
-            itemClickListener.onEditClicked(position)
+            itemClickListener.onEditClicked(currentItem.classId)
         }
+
     }
 
     override fun getItemCount(): Int {
