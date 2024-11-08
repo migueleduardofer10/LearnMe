@@ -4,6 +4,7 @@ plugins {
     id("androidx.navigation.safeargs")
 
     id("org.jetbrains.kotlin.plugin.compose")
+    kotlin("kapt")
 }
 
 android {
@@ -112,4 +113,14 @@ dependencies {
 
     // Gson for JSON parsing in SharedPreferences
     implementation("com.google.code.gson:gson:2.8.9")
+
+    // Room components
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1") // o la versión actual
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    runtimeOnly("androidx.room:room-ktx:2.6.1")
+
+
 }
