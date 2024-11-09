@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
 
 // Modelo de datos
-data class ItemClass(val title: String, val classId: Int)
+data class ItemClass(val className: String, val classId: Int)
 
 class ItemAdapter(
     private val itemList: List<ItemClass>,
@@ -26,7 +26,7 @@ class ItemAdapter(
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val titleTextView: TextView = itemView.findViewById(R.id.classNameText)
+        val className: TextView = itemView.findViewById(R.id.classNameText)
         val cameraButton: ImageButton = itemView.findViewById(R.id.cameraButton)
         val uploadButton: ImageButton = itemView.findViewById(R.id.uploadButton)
         val editButton: ImageButton = itemView.findViewById(R.id.editButton)
@@ -42,7 +42,7 @@ class ItemAdapter(
         val currentItem = itemList[position]
 
         // Asignar los datos a las vistas
-        holder.titleTextView.text = currentItem.title
+        holder.className.text = currentItem.className
 
         // Asignar listeners a los botones
         holder.cameraButton.setOnClickListener {

@@ -1,13 +1,18 @@
 package com.example.learnme.activity
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.View
 import androidx.activity.ComponentActivity
 import com.example.learnme.AppDatabase
 import com.example.learnme.ImageDao
 import com.example.learnme.ImageEntity
 import com.example.learnme.R
+import com.example.learnme.config.GPTConfig
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.fragments.ImageAdapter
@@ -16,9 +21,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 
 class CaptureResumeActivity : ComponentActivity() {
+
+    private val client = OkHttpClient()
 
     private lateinit var binding: ActivityCaptureResumeBinding
     private lateinit var adapter: ImageAdapter
@@ -41,8 +59,9 @@ class CaptureResumeActivity : ComponentActivity() {
 
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
-        val className = "Clase $classId"
-        binding.nameEditText.text = className
+
+        // Obtener el nombre de la clase desde la base de datos y mostrarlo en la UI
+        loadClassName()
 
         // Configurar el RecyclerView
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
@@ -58,8 +77,7 @@ class CaptureResumeActivity : ComponentActivity() {
         )
 
         // Cargar imágenes desde la base de datos
-        loadImagesForClass()
-
+        loadImagesForClass { generateLabelIfNeeded() }
 
         binding.cameraButton.setOnClickListener {
             val intent = Intent(this, DataCaptureActivity::class.java)
@@ -96,22 +114,119 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
+    // Cargar el nombre de la clase desde la base de datos
+    private fun loadClassName() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val className = database.classDao().getClassNameById(classId) ?: "Clase $classId"
+
+            withContext(Dispatchers.Main) {
+                binding.nameEditText.text = className
+            }
+        }
+    }
+
     // Cargar imágenes asociadas al classId desde la base de datos
-    private fun loadImagesForClass() {
+    private fun loadImagesForClass(onImagesLoaded: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val images = imageDao.getImagesForClass(classId)
             val tempImageList = images.map { ImageItem(it.imagePath, it.classId) }
 
             withContext(Dispatchers.Main) {
                 imageList.clear()
-                imageList.addAll(
-                    tempImageList.sortedBy { imageItem ->
-                        File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
-                    }
-                )
+                imageList.addAll(tempImageList.sortedBy {
+                    File(it.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
+                })
                 adapter.notifyDataSetChanged()
+                onImagesLoaded()  // Llama a la función una vez que las imágenes se hayan cargado
             }
         }
+    }
+
+    // Genera una etiqueta automática para la clase usando la primera imagen si no tiene un nombre asignado
+    private fun generateLabelIfNeeded() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val classEntity = database.classDao().getClassById(classId)
+
+            // Verificar si ya se ha generado una etiqueta
+            if (classEntity != null && !classEntity.isLabelGenerated && imageList.isNotEmpty()) {
+                val firstImagePath = imageList.first().imagePath
+                val base64Image = encodeImageToBase64(firstImagePath)
+
+                sendImageToGPT4(base64Image) { response ->
+                    // Actualizar el nombre de la clase y marcar isLabelGenerated como true
+                    updateClassName(response)
+                }
+            }
+        }
+    }
+
+    // Actualizar el nombre de la clase en la base de datos
+    private fun updateClassName(newName: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.classDao().updateClassName(classId, newName)
+            withContext(Dispatchers.Main) {
+                binding.nameEditText.text = newName  // Actualizar en la interfaz
+            }
+        }
+    }
+
+    // Codifica la imagen a Base64
+    private fun encodeImageToBase64(imagePath: String): String {
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+    }
+
+    // Envía la imagen a la API de GPT-4 para obtener una etiqueta
+    private fun sendImageToGPT4(base64Image: String, callback: (String) -> Unit) {
+        val url = GPTConfig.BASE_URL
+        val apiKey = GPTConfig.CHAT_GPT_API_KEY
+        val requestBody = """
+            {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Genera un nombre descriptivo de esta imagen en español de no más de 15 caracteres."},
+                            {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,$base64Image"}}
+                        ]
+                    }
+                ],
+                "max_tokens": 300
+            }
+        """.trimIndent()
+
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("Error", "API request failed", e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    try {
+                        val jsonObject = JSONObject(responseBody)
+                        val choicesArray = jsonObject.getJSONArray("choices")
+                        val generatedLabel = choicesArray
+                            .getJSONObject(0)
+                            .getJSONObject("message")
+                            .getString("content")
+                        callback(generatedLabel)
+                    } catch (e: JSONException) {
+                        Log.e("Error", "Failed to parse JSON", e)
+                    }
+                }
+            }
+        })
     }
 
     private fun toggleSelection(imageItem: ImageItem) {
@@ -162,5 +277,4 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.deleteButton.visibility = View.GONE
         binding.cancelButton.visibility = View.GONE
     }
-
 }
