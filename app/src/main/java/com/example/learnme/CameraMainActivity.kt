@@ -22,8 +22,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import com.example.learnme.databinding.CameraActivityMainBinding
-import com.example.learnme.fragments.HelperDialog
-import com.example.learnme.fragments.SettingFragment
+import com.example.learnme.fragment.HelperDialog
+import com.example.learnme.fragment.SettingFragment
 
 class CameraMainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: CameraActivityMainBinding

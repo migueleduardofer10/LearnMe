@@ -3,9 +3,9 @@ package com.example.learnme.config
 import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.learnme.fragments.GridSpacingItemDecoration
-import com.example.learnme.fragments.ImageAdapter
-import com.example.learnme.fragments.ImageItem
+import com.example.learnme.fragment.GridSpacingItemDecoration
+import com.example.learnme.adapter.ImageAdapter
+import com.example.learnme.adapter.ImageItem
 
 object GridConfig {
 

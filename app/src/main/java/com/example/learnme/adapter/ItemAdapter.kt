@@ -1,4 +1,4 @@
-package com.example.learnme.fragments
+package com.example.learnme.adapter
 
 
 import android.view.LayoutInflater

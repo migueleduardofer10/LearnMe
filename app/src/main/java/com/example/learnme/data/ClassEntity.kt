@@ -1,4 +1,4 @@
-package com.example.learnme
+package com.example.learnme.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

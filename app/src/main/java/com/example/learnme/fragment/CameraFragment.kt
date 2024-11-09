@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration

@@ -4,11 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.learnme.AppDatabase
-import com.example.learnme.ClassDao
-import com.example.learnme.ClassEntity
-import com.example.learnme.fragments.ItemAdapter
-import com.example.learnme.fragments.ItemClass
+import com.example.learnme.data.AppDatabase
+import com.example.learnme.data.ClassDao
+import com.example.learnme.data.ClassEntity
+import com.example.learnme.adapter.ItemAdapter
+import com.example.learnme.adapter.ItemClass
 import com.example.learnme.databinding.ActivityClassSelectionBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

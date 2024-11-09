@@ -1,4 +1,4 @@
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import android.Manifest
 import android.content.Context

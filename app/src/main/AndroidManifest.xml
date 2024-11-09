@@ -85,12 +85,6 @@
             android:theme="@style/AppTheme" />
 
         <activity
-            android:name=".activity.GPT4Activity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme" />
-
-        <activity
             android:name=".activity.TrainingLoadActivity"
             android:exported="true"
             android:label="@string/app_name"
