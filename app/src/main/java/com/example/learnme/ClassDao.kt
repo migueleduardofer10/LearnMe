@@ -6,16 +6,27 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
+// No trabaja con suspend fun
+
 @Dao
 interface ClassDao {
     @Query("SELECT * FROM classes")
     fun getAllClasses(): List<ClassEntity>
 
+    @Query("SELECT * FROM classes WHERE classId = :classId")
+    fun getClassById(classId: Int): ClassEntity?
+
+    @Query("SELECT class_name FROM classes WHERE classId = :classId")
+    fun getClassNameById(classId: Int): String?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertClass(classEntity: ClassEntity): Long
 
-    @Query("DELETE FROM classes WHERE classId = :classId")
-    fun deleteClass(classId: Int)
+//    @Query("DELETE FROM classes WHERE classId = :classId")
+//    fun deleteClass(classId: Int)
+
+    @Query("UPDATE classes SET class_name = :newName, isLabelGenerated = 1 WHERE classId = :classId")
+    fun updateClassName(classId: Int, newName: String)
 }
 
 @Dao
