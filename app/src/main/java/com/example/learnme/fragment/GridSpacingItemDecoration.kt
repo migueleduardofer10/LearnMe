@@ -1,4 +1,4 @@
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import android.graphics.Rect
 import android.view.View

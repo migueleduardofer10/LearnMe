@@ -1,4 +1,4 @@
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import androidx.activity.ComponentActivity
 import androidx.camera.core.CameraSelector

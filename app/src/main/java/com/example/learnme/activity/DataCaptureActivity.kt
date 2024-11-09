@@ -7,15 +7,16 @@ import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
-import com.example.learnme.AppDatabase
-import com.example.learnme.ImageDao
-import com.example.learnme.ImageEntity
+import com.example.learnme.data.AppDatabase
+import com.example.learnme.data.ImageDao
+import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityDataCaptureBinding
-import com.example.learnme.fragments.CameraHelper
-import com.example.learnme.fragments.ImageAdapter
-import com.example.learnme.fragments.ImageItem
+import com.example.learnme.fragment.CameraHelper
+import com.example.learnme.adapter.ImageAdapter
+import com.example.learnme.adapter.ImageItem
+import com.example.learnme.fragment.CameraPermissionsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,24 +67,30 @@ class DataCaptureActivity : ComponentActivity() {
         // Cargar imágenes desde SharedPreferences
         loadCapturedImages()
 
-        // Inicializar CameraHelper con la vista de vista previa
-        cameraHelper = CameraHelper(
-            this,
-            binding.previewView,
-            onImageCaptured = { imageFile ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    // Guardar la imagen en la base de datos
-                    val imageItem = ImageEntity(imagePath = imageFile.path, classId = classId)
-                    imageDao.insertImage(imageItem) // Guardar imagen en la base de datos
+        // Inicializar permisos de cámara
+        val cameraPermissionsManager = CameraPermissionsManager(this) {
+            // Solo se ejecuta si el permiso es otorgado
+            // Inicializar CameraHelper con la vista de vista previa
+            cameraHelper = CameraHelper(
+                this,
+                binding.previewView,
+                onImageCaptured = { imageFile ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        // Guardar la imagen en la base de datos
+                        val imageItem = ImageEntity(imagePath = imageFile.path, classId = classId)
+                        imageDao.insertImage(imageItem) // Guardar imagen en la base de datos
 
-                    withContext(Dispatchers.Main) {
-                        imageList.add(ImageItem(imageFile.path, classId))
-                        adapter.notifyItemInserted(imageList.size - 1)
+                        withContext(Dispatchers.Main) {
+                            imageList.add(ImageItem(imageFile.path, classId))
+                            adapter.notifyItemInserted(imageList.size - 1)
+                        }
                     }
                 }
-            }
-        )
-        cameraHelper.startCamera()
+            )
+            cameraHelper.startCamera()
+        }
+
+        cameraPermissionsManager.checkAndRequestPermission()
 
         binding.cameraButton.setOnTouchListener { _, event ->
             when (event.action) {

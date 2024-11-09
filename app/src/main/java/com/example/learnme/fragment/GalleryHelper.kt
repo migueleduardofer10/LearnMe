@@ -1,8 +1,9 @@
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
+import com.example.learnme.adapter.ImageItem
 
 class GalleryHelper(private val context: Context) {
 

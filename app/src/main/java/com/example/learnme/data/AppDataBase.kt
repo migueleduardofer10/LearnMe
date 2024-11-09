@@ -1,4 +1,4 @@
-package com.example.learnme
+package com.example.learnme.data
 
 import android.content.Context
 import androidx.room.Database
