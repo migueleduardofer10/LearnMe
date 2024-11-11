@@ -44,19 +44,16 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
-
         <activity
             android:name=".activity.Step3Activity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
-
         <activity
             android:name=".activity.Step2Activity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
-
         <activity
             android:name=".activity.DataCaptureActivity"
             android:exported="true"
@@ -77,24 +74,21 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.LearnMe" />
-
-        <activity
-            android:name=".CameraMainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme" />
-
         <activity
             android:name=".activity.TrainingLoadActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".activity.ModelTestingActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
 
-    </application>
+        <activity
+            android:name=".CameraMainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme" />
+        </application>
 </manifest>

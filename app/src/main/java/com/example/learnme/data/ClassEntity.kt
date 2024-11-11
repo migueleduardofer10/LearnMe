@@ -28,5 +28,6 @@ data class ClassEntity(
 data class ImageEntity(
     @PrimaryKey(autoGenerate = true) val imageId: Int = 0,
     @ColumnInfo(name = "image_path") val imagePath: String,
-    @ColumnInfo(name = "classId") val classId: Int
+    @ColumnInfo(name = "classId") val classId: Int,
+//    @ColumnInfo(name = "rotation") val rotation: Int
 )

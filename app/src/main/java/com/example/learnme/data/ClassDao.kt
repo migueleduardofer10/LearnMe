@@ -31,6 +31,9 @@ interface ClassDao {
 
 @Dao
 interface ImageDao {
+    @Query("SELECT * FROM images")
+    fun getAllImages(): List<ImageEntity>
+
     @Query("SELECT * FROM images WHERE classId = :classId")
     fun getImagesForClass(classId: Int): List<ImageEntity>
 

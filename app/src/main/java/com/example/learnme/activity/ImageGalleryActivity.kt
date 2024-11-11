@@ -88,7 +88,8 @@ class ImageGalleryActivity : ComponentActivity() {
             selectedImages.forEach { imageItem ->
                 val imageEntity = ImageEntity(
                     imagePath = imageItem.imagePath,
-                    classId = classId
+                    classId = classId,
+//                    rotation = 0
                 )
                 database.imageDao().insertImage(imageEntity)  // Inserta la imagen en la base de datos
             }

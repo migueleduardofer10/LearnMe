@@ -2,11 +2,14 @@ package com.example.learnme.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
+import androidx.camera.core.ImageProxy
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ImageDao
 import com.example.learnme.data.ImageEntity
@@ -22,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
 
 
 class DataCaptureActivity : ComponentActivity() {
@@ -74,17 +78,8 @@ class DataCaptureActivity : ComponentActivity() {
             cameraHelper = CameraHelper(
                 this,
                 binding.previewView,
-                onImageCaptured = { imageFile ->
-                    CoroutineScope(Dispatchers.IO).launch {
-                        // Guardar la imagen en la base de datos
-                        val imageItem = ImageEntity(imagePath = imageFile.path, classId = classId)
-                        imageDao.insertImage(imageItem) // Guardar imagen en la base de datos
-
-                        withContext(Dispatchers.Main) {
-                            imageList.add(ImageItem(imageFile.path, classId))
-                            adapter.notifyItemInserted(imageList.size - 1)
-                        }
-                    }
+                onImageCaptured = { imageProxy ->
+                    processAndSaveImage(imageProxy)
                 }
             )
             cameraHelper.startCamera()
@@ -140,6 +135,38 @@ class DataCaptureActivity : ComponentActivity() {
                     }
                 )
                 adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    // Procesar y guardar ImageProxy en un archivo
+    private fun processAndSaveImage(imageProxy: ImageProxy) {
+        val imageFile = File(externalMediaDirs.first(), "${System.currentTimeMillis()}.jpg")
+        val bitmap = Bitmap.createBitmap(imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888)
+        bitmap.copyPixelsFromBuffer(imageProxy.planes[0].buffer)
+
+        // Obtener la rotación de la imagen desde el `imageProxy`
+        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, Matrix().apply {
+            postRotate(rotationDegrees.toFloat())
+        }, true)
+
+        // Guardar el `rotatedBitmap` en lugar del `bitmap` original
+        FileOutputStream(imageFile).use { outputStream ->
+            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        }
+
+        // Cerrar ImageProxy después de procesar
+        imageProxy.close()
+
+        // Guardar en la base de datos y actualizar la interfaz de usuario
+        CoroutineScope(Dispatchers.IO).launch {
+            val imageItem = ImageEntity(imagePath = imageFile.path, classId = classId)
+            imageDao.insertImage(imageItem)  // Guardar imagen en la base de datos
+
+            withContext(Dispatchers.Main) {
+                imageList.add(ImageItem(imageFile.path, classId))
+                adapter.notifyItemInserted(imageList.size - 1)
             }
         }
     }
