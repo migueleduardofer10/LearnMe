@@ -23,6 +23,7 @@ class ItemAdapter(
         fun onCameraClicked(classId: Int)
         fun onUploadClicked(classId: Int)
         fun onEditClicked(classId: Int)
+        fun onAudioClicked(classId: Int)
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,6 +31,7 @@ class ItemAdapter(
         val cameraButton: ImageButton = itemView.findViewById(R.id.cameraButton)
         val uploadButton: ImageButton = itemView.findViewById(R.id.uploadButton)
         val editButton: ImageButton = itemView.findViewById(R.id.editButton)
+        val audioButton: ImageButton = itemView.findViewById(R.id.audioButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -54,7 +56,9 @@ class ItemAdapter(
         holder.editButton.setOnClickListener {
             itemClickListener.onEditClicked(currentItem.classId)
         }
-
+        holder.audioButton.setOnClickListener {
+            itemClickListener.onAudioClicked(currentItem.classId)
+        }
     }
 
     override fun getItemCount(): Int {
