@@ -36,7 +36,10 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
         // Cargar lista de clases en un hilo en segundo plano
         CoroutineScope(Dispatchers.IO).launch {
-            val classes = classDao.getAllClasses().map { ItemClass(it.className, it.classId) }
+            val classes = classDao.getAllClasses().map { classEntity ->
+                val sampleCount = database.imageDao().getImageCountForClass(classEntity.classId)
+                ItemClass(classEntity.className, classEntity.classId, sampleCount)
+            }
             withContext(Dispatchers.Main) {
                 itemList = classes.toMutableList()
                 setupRecyclerView()
@@ -66,7 +69,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             val classId = classDao.insertClass(newClass).toInt()
 
             withContext(Dispatchers.Main) {
-                itemList.add(ItemClass("Clase $classId", classId))
+                itemList.add(ItemClass("Clase $classId", classId, 0))
                 adapter.notifyItemInserted(itemList.size - 1)
             }
         }
