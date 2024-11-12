@@ -27,6 +27,9 @@ interface ClassDao {
 
     @Query("UPDATE classes SET class_name = :newName, isLabelGenerated = 1 WHERE classId = :classId")
     fun updateClassName(classId: Int, newName: String)
+
+    @Query("UPDATE classes SET audio_path = :audioPath WHERE classId = :classId")
+    fun updateAudioPath(classId: Int, audioPath: String)
 }
 
 @Dao

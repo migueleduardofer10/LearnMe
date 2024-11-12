@@ -11,7 +11,8 @@ data class ClassEntity(
     @PrimaryKey(autoGenerate = true) val classId: Int = 0,
     @ColumnInfo(name = "class_name") val className: String,
 //    @ColumnInfo(name = "description") val description: String
-    @ColumnInfo(name = "isLabelGenerated")var isLabelGenerated: Boolean = false
+    @ColumnInfo(name = "isLabelGenerated")var isLabelGenerated: Boolean = false,
+    @ColumnInfo(name = "audio_path") var audioPath: String? = null
 
 )
 

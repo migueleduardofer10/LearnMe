@@ -19,6 +19,8 @@ package com.example.learnme.fragment
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -41,6 +43,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.example.learnme.R
 import com.example.learnme.MainViewModel
@@ -49,8 +52,12 @@ import com.example.learnme.TransferLearningHelper.Companion.CLASS_FOUR
 import com.example.learnme.TransferLearningHelper.Companion.CLASS_ONE
 import com.example.learnme.TransferLearningHelper.Companion.CLASS_THREE
 import com.example.learnme.TransferLearningHelper.Companion.CLASS_TWO
+import com.example.learnme.data.AppDatabase
 import com.example.learnme.databinding.FragmentCameraBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category
+import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutorService
@@ -78,6 +85,7 @@ class CameraFragment : Fragment(),
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var previousClass: String? = null
+    private var currentPlayingClass: String? = null  // Variable para almacenar la clase actualmente en reproducción
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -86,6 +94,12 @@ class CameraFragment : Fragment(),
     // that class will be added to this queue. It is later extracted by
     // InferenceThread and processed.
     private val addSampleRequests = ConcurrentLinkedQueue<String>()
+
+
+    private var audioUrisLoaded = false // Flag para evitar cargas múltiples
+    private var mediaPlayer: MediaPlayer? = null
+    private var audioUriMap: MutableMap<String, Uri> = mutableMapOf()
+
 
     private var sampleCollectionButtonPressedTime: Long = 0
     private var isCollectingSamples = false
@@ -136,6 +150,11 @@ class CameraFragment : Fragment(),
                 R.id.fragment_container
             ).navigate(CameraFragmentDirections.actionCameraToPermissions())
         }
+
+        // Verificar si estamos en modo de inferencia y cargar URIs si es necesario
+        if (viewModel.getCaptureMode() == false && !audioUrisLoaded) {
+            loadAudioUrisFromDatabase()
+        }
     }
 
     override fun onDestroyView() {
@@ -157,9 +176,28 @@ class CameraFragment : Fragment(),
         return fragmentCameraBinding.root
     }
 
+    private fun loadAudioUrisFromDatabase() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val classDao = AppDatabase.getInstance(requireContext()).classDao()
+            val classes = classDao.getAllClasses()
+
+            classes.forEach { classEntity ->
+                classEntity.audioPath?.let { path ->
+                    audioUriMap[classEntity.className] = Uri.parse(path)
+                    Log.d("AudioDebug", "Cargado audio para clase ${classEntity.className}: URI=${Uri.parse(path)}")
+                }
+            }
+
+            // Marcar los URIs como cargados para evitar recargas
+            audioUrisLoaded = true
+        }
+    }
     @SuppressLint("MissingPermission", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Inicializamos el MediaPlayer una sola vez
+        initializeMediaPlayer()
 
         transferLearningHelper = TransferLearningHelper(
             context = requireContext(),
@@ -266,6 +304,7 @@ class CameraFragment : Fragment(),
             }
         }
     }
+
 
     // Initialize CameraX, and prepare to bind the camera use cases
     private fun setUpCamera() {
@@ -411,6 +450,66 @@ class CameraFragment : Fragment(),
                 fragmentCameraBinding.tvInferenceTime.text =
                     String.format("%d ms", inferenceTime)
             }
+        }
+    }
+
+    private fun initializeMediaPlayer() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer()
+            mediaPlayer?.setOnPreparedListener {
+                Log.d("MediaPlayer", "MediaPlayer preparado, iniciando reproducción")
+                it.start()
+            }
+            mediaPlayer?.setOnCompletionListener {
+                Log.d("MediaPlayer", "Reproducción completada")
+                it.reset()
+            }
+        }
+    }
+
+    private fun playClassAudio(className: String) {
+        if (className != currentPlayingClass) {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    Log.d("playClassAudio", "Deteniendo el audio actual y reseteando.")
+                    stop()
+                    reset()
+                }
+            }
+
+            if (mediaPlayer == null) {
+                mediaPlayer = MediaPlayer()
+            }
+
+            val audioUri = audioUriMap[className]
+            if (audioUri != null) {
+                try {
+                    mediaPlayer?.setDataSource(requireContext(), audioUri)
+
+                    mediaPlayer?.setOnPreparedListener {
+                        Log.d("playClassAudio", "Nuevo audio preparado, iniciando reproducción.")
+                        it.start()
+                    }
+
+                    mediaPlayer?.setOnCompletionListener {
+                        Log.d("playClassAudio", "Reproducción completada para la clase $className.")
+                        it.reset()
+                    }
+
+                    mediaPlayer?.prepareAsync()
+
+                    currentPlayingClass = className
+
+                } catch (e: IOException) {
+                    Log.e("CameraFragment", "Error al preparar el audio: ${e.message}")
+                } catch (e: IllegalStateException) {
+                    Log.e("CameraFragment", "Error de estado ilegal en el MediaPlayer: ${e.message}")
+                }
+            } else {
+                Log.e("CameraFragment", "No se encontró URI para la clase $className")
+            }
+        } else {
+            Log.d("playClassAudio", "La clase $className ya está en reproducción, manteniendo el audio actual.")
         }
     }
 

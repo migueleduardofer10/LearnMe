@@ -90,4 +90,9 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         startActivity(intent)
     }
 
+    override fun onAudioClicked(classId: Int) {
+        val intent = Intent(this, AudioActivity::class.java)
+        intent.putExtra("classId", classId)
+        startActivity(intent)
+    }
 }

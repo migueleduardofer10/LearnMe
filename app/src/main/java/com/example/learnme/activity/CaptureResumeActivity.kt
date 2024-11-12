@@ -3,10 +3,16 @@ package com.example.learnme.activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ImageDao
@@ -46,6 +52,11 @@ class CaptureResumeActivity : ComponentActivity() {
     private lateinit var database: AppDatabase
     private lateinit var imageDao: ImageDao
 
+    private var mediaPlayer: MediaPlayer? = null
+    private var isPlaying = false
+    private var audioUri: Uri? = null
+    private val handler = Handler(Looper.getMainLooper())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -61,6 +72,7 @@ class CaptureResumeActivity : ComponentActivity() {
 
         // Obtener el nombre de la clase desde la base de datos y mostrarlo en la UI
         loadClassName()
+        loadSavedAudio()
 
         // Configurar el RecyclerView
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
@@ -111,15 +123,127 @@ class CaptureResumeActivity : ComponentActivity() {
             intent.putExtra("classId", classId)
             startActivity(intent)
         }
+        binding.playAudioButton.setOnClickListener {
+            if (isPlaying) pauseAudio() else playAudio()
+        }
     }
 
-    // Cargar el nombre de la clase desde la base de datos
+
+    private fun setupRecyclerView() {
+        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
+        adapter = GridConfig.setupGridWithAdapter(
+            recyclerView = binding.recyclerViewImages,
+            context = this,
+            spanCount = 5,
+            spacing = spacing,
+            imageList = imageList,
+            onItemClick = { toggleSelection(it) }
+        )
+    }
+
+    private fun playAudio() {
+        audioUri?.let { uri ->
+            try {
+                mediaPlayer?.release()
+                mediaPlayer = MediaPlayer().apply {
+                    contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                        setDataSource(pfd.fileDescriptor)
+                    }
+                    prepare()
+                    start()
+                }
+                setupSeekBar()
+                isPlaying = true
+                binding.playAudioButton.text = "Pausa"
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(this, "Error al reproducir el audio", Toast.LENGTH_SHORT).show()
+            }
+        } ?: Toast.makeText(this, "No se ha cargado un audio", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun pauseAudio() {
+        mediaPlayer?.let {
+            if (it.isPlaying) {
+                it.pause()
+                isPlaying = false
+                binding.playAudioButton.text = "Reproducir"
+            }
+        }
+    }
+
+    private fun setupSeekBar() {
+        mediaPlayer?.let { player ->
+            binding.seekBar.max = player.duration
+            handler.postDelayed(object : Runnable {
+                override fun run() {
+                    mediaPlayer?.let { mp ->
+                        if (mp.isPlaying) {
+                            binding.seekBar.progress = mp.currentPosition
+                            handler.postDelayed(this, 1000)
+                        }
+                    }
+                }
+            }, 1000)
+
+            binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    if (fromUser) mediaPlayer?.seekTo(progress)
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+
+            player.setOnCompletionListener {
+                isPlaying = false
+                binding.playAudioButton.text = "Reproducir"
+                binding.seekBar.progress = 0
+            }
+        }
+    }
+
+    private fun loadSavedAudio() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val audioPath = database.classDao().getClassById(classId)?.audioPath
+            audioPath?.let {
+                audioUri = Uri.parse(it)
+                if (isUriAccessible(audioUri!!)) {
+                    withContext(Dispatchers.Main) {
+                        binding.audioStatus.text = "Audio cargado"
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@CaptureResumeActivity, "El audio guardado no es accesible", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isUriAccessible(uri: Uri): Boolean {
+        return try {
+            contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer?.release()
+        handler.removeCallbacksAndMessages(null)
+    }
+
+
     private fun loadClassName() {
         CoroutineScope(Dispatchers.IO).launch {
-            val className = database.classDao().getClassNameById(classId) ?: "Clase $classId"
+            val classEntity = database.classDao().getClassById(classId)
+
+            val className = classEntity?.className ?: "Clase desconocida"
 
             withContext(Dispatchers.Main) {
-                binding.nameEditText.text = className
+                binding.nameEditText.setText(className)
             }
         }
     }
