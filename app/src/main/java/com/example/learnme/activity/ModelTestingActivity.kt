@@ -208,28 +208,28 @@ class ModelTestingActivity : ComponentActivity(), TransferLearning.ClassifierLis
         runOnUiThread {
             results?.let { list ->
                 list.maxByOrNull { it.score }?.let { highestScoreCategory ->
-                    Log.d("InferenceResult", "Categoría: ${highestScoreCategory.label}, Puntaje: ${highestScoreCategory.score}, Tiempo de inferencia: ${inferenceTime} ms")
-                    if (audioUrisLoaded && highestScoreCategory.score >= 0.8) {
-                        // Intentar convertir la etiqueta a un ID
-                        val classId = highestScoreCategory.label.toIntOrNull() ?: -1
+                    val confidenceScore = highestScoreCategory.score
+                    val label = highestScoreCategory.label
+                    Log.d("InferenceResult", "Categoría: $label, Puntaje: $confidenceScore, Tiempo de inferencia: $inferenceTime ms")
 
-                        // Verificar que el ID sea válido y obtener el className usando el mapa
+                    if (audioUrisLoaded && confidenceScore >= 0.8) {
+                        val classId = label.toIntOrNull() ?: -1
                         if (classId != -1) {
                             val className = classIdToNameMap[classId]
                             if (className != null) {
+                                binding.nameClass.text = className
+                                binding.precisionText.text = "Precisión: ${"%.2f".format(confidenceScore * 100)}%"
+
                                 playClassAudio(className)
                             } else {
                                 Log.e("ModelTestingActivity", "No se encontró un nombre para la clase con ID: $classId")
                             }
-                        } else {
-                            Log.e("ModelTestingActivity", "Error al convertir la etiqueta de la clase a un ID válido: ${highestScoreCategory.label}")
                         }
                     }
                 }
             }
         }
     }
-
     override fun onLossResults(lossNumber: Float) {
         TODO("Not yet implemented")
     }

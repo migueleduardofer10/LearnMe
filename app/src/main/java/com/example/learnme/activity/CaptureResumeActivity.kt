@@ -285,8 +285,9 @@ class CaptureResumeActivity : ComponentActivity() {
 
     // Actualizar el nombre de la clase en la base de datos
     private fun updateClassName(newName: String) {
+        val trimmedName = newName.trim().replace("\"", "")
         CoroutineScope(Dispatchers.IO).launch {
-            database.classDao().updateClassName(classId, newName)
+            database.classDao().updateClassName(classId, trimmedName)
             withContext(Dispatchers.Main) {
                 binding.nameEditText.text = newName  // Actualizar en la interfaz
             }
