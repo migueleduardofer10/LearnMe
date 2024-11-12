@@ -283,16 +283,19 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-    // Actualizar el nombre de la clase en la base de datos
+    // Actualizar el nombre de la clase en la base de datos y la UI
     private fun updateClassName(newName: String) {
         val trimmedName = newName.trim().replace("\"", "")
+
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.nameEditText.setText(trimmedName)  // Actualiza el nombre en la UI
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             database.classDao().updateClassName(classId, trimmedName)
-            withContext(Dispatchers.Main) {
-                binding.nameEditText.text = newName  // Actualizar en la interfaz
-            }
         }
     }
+
 
     // Codifica la imagen a Base64
     private fun encodeImageToBase64(imagePath: String): String {
