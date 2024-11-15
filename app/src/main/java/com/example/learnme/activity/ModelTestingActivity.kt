@@ -46,6 +46,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearning.ClassifierLis
             cameraHelper.startCamera()
             cameraHelper.startInference()
         }
+
         cameraPermissionsManager.checkAndRequestPermission()
 
         // Configurar el MediaPlayer
@@ -189,6 +190,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearning.ClassifierLis
 
         Log.d("Inference", "Imagen capturada")
 
+        // Copia los píxeles de la imagen en el buffer de bitmap
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
         transferLearningHelper.classify(bitmapBuffer, image.imageInfo.rotationDegrees)
     }
@@ -200,6 +202,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearning.ClassifierLis
         mediaPlayer = null
         cameraHelper.shutdown()
     }
+
     override fun onError(error: String) {
         TODO("Not yet implemented")
     }

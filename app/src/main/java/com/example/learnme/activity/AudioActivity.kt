@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.databinding.ActivityAudioBinding
+import com.example.learnme.fragment.AudioHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,13 +27,12 @@ import java.io.IOException
 
 class AudioActivity : ComponentActivity() {
 
+    private lateinit var audioHelper: AudioHelper
+
     private lateinit var binding: ActivityAudioBinding
-    private var mediaPlayer: MediaPlayer? = null
-    private var isPlaying = false
     private var audioUri: Uri? = null
     private var classId: Int = -1
     private val database: AppDatabase by lazy { AppDatabase.getInstance(this) }
-    private val handler = Handler(Looper.getMainLooper())
 
     private var mediaRecorder: MediaRecorder? = null
     private var isRecording = false
@@ -55,6 +55,14 @@ class AudioActivity : ComponentActivity() {
         setContentView(binding.root)
 
         classId = intent.getIntExtra("classId", -1)
+
+        audioHelper = AudioHelper(
+            context = this,
+            contentResolver = contentResolver,
+            audioStatusView = binding.audioStatus,
+            playAudioButton = binding.playPauseButton,
+            seekBar = binding.seekBar
+        )
 
         binding.previousButton.setOnClickListener {
             val intent = Intent(this, ClassSelectionActivity::class.java)
@@ -81,10 +89,10 @@ class AudioActivity : ComponentActivity() {
         }
 
         binding.playPauseButton.setOnClickListener {
-            if (isPlaying) {
-                pauseAudio()
+            if (audioHelper.isPlaying) {
+                audioHelper.pauseAudio()
             } else {
-                playAudio()
+                audioHelper.playAudio()
             }
         }
 
@@ -100,95 +108,15 @@ class AudioActivity : ComponentActivity() {
         }
     }
 
-    private fun playAudio() {
-        audioUri?.let { uri ->
-            try {
-                mediaPlayer?.release()
-
-                mediaPlayer = MediaPlayer().apply {
-                    contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-                        setDataSource(pfd.fileDescriptor)
-                    }
-                    prepare()
-                    start()
-                }
-
-                setupSeekBar()
-                isPlaying = true
-                binding.playPauseButton.text = "Pausa"
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Toast.makeText(this, "Error al reproducir el audio", Toast.LENGTH_SHORT).show()
-            }
-        } ?: Toast.makeText(this, "No se ha cargado un audio", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun pauseAudio() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.pause()
-                isPlaying = false
-                binding.playPauseButton.text = "Reproducir"
-            }
-        }
-    }
-
-    private fun setupSeekBar() {
-        mediaPlayer?.let { player ->
-            binding.seekBar.max = player.duration
-            handler.postDelayed(object : Runnable {
-                override fun run() {
-                    mediaPlayer?.let { mp ->
-                        if (mp.isPlaying) {
-                            binding.seekBar.progress = mp.currentPosition
-                            handler.postDelayed(this, 1000)
-                        }
-                    }
-                }
-            }, 1000)
-
-            binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    if (fromUser) {
-                        mediaPlayer?.seekTo(progress)
-                    }
-                }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-
-            player.setOnCompletionListener {
-                isPlaying = false
-                binding.playPauseButton.text = "Reproducir"
-                binding.seekBar.progress = 0
-            }
-        }
-    }
-
     private fun loadSavedAudio() {
         CoroutineScope(Dispatchers.IO).launch {
             val audioPath = database.classDao().getClassById(classId)?.audioPath
             audioPath?.let {
                 audioUri = Uri.parse(it)
-                if (isUriAccessible(audioUri!!)) {
-                    withContext(Dispatchers.Main) {
-                        binding.audioStatus.text = "Audio cargado"
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@AudioActivity, "El audio guardado no es accesible", Toast.LENGTH_SHORT).show()
-                    }
+                withContext(Dispatchers.Main) {
+                    audioHelper.setAudioUri(audioUri!!)
                 }
             }
-        }
-    }
-
-    private fun isUriAccessible(uri: Uri): Boolean {
-        return try {
-            contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
-        } catch (e: Exception) {
-            false
         }
     }
 
@@ -244,7 +172,6 @@ class AudioActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.release()
-        handler.removeCallbacksAndMessages(null)
+        audioHelper.release()
     }
 }

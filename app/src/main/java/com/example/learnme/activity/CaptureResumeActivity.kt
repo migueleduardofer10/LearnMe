@@ -22,6 +22,8 @@ import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
+import com.example.learnme.fragment.AudioHelper
+import com.example.learnme.fragment.GPT4Helper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,9 +50,11 @@ class CaptureResumeActivity : ComponentActivity() {
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
-
     private lateinit var database: AppDatabase
     private lateinit var imageDao: ImageDao
+
+    private lateinit var audioHelper: AudioHelper
+    private lateinit var gptHelper: GPT4Helper
 
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
@@ -69,6 +73,15 @@ class CaptureResumeActivity : ComponentActivity() {
 
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
+
+        gptHelper = GPT4Helper(client)
+        audioHelper = AudioHelper(
+            context = this,
+            contentResolver = contentResolver,
+            audioStatusView = binding.audioStatus,
+            playAudioButton = binding.playAudioButton,
+            seekBar = binding.seekBar
+        )
 
         // Obtener el nombre de la clase desde la base de datos y mostrarlo en la UI
         loadClassName()
@@ -123,81 +136,14 @@ class CaptureResumeActivity : ComponentActivity() {
             intent.putExtra("classId", classId)
             startActivity(intent)
         }
+
         binding.playAudioButton.setOnClickListener {
-            if (isPlaying) pauseAudio() else playAudio()
-        }
-    }
-
-
-    private fun setupRecyclerView() {
-        val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
-        adapter = GridConfig.setupGridWithAdapter(
-            recyclerView = binding.recyclerViewImages,
-            context = this,
-            spanCount = 5,
-            spacing = spacing,
-            imageList = imageList,
-            onItemClick = { toggleSelection(it) }
-        )
-    }
-
-    private fun playAudio() {
-        audioUri?.let { uri ->
-            try {
-                mediaPlayer?.release()
-                mediaPlayer = MediaPlayer().apply {
-                    contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-                        setDataSource(pfd.fileDescriptor)
-                    }
-                    prepare()
-                    start()
+            binding.playAudioButton.setOnClickListener {
+                if (audioHelper.isPlaying) {
+                    audioHelper.pauseAudio()
+                } else {
+                    audioHelper.playAudio()
                 }
-                setupSeekBar()
-                isPlaying = true
-                binding.playAudioButton.text = "Pausa"
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Toast.makeText(this, "Error al reproducir el audio", Toast.LENGTH_SHORT).show()
-            }
-        } ?: Toast.makeText(this, "No se ha cargado un audio", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun pauseAudio() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.pause()
-                isPlaying = false
-                binding.playAudioButton.text = "Reproducir"
-            }
-        }
-    }
-
-    private fun setupSeekBar() {
-        mediaPlayer?.let { player ->
-            binding.seekBar.max = player.duration
-            handler.postDelayed(object : Runnable {
-                override fun run() {
-                    mediaPlayer?.let { mp ->
-                        if (mp.isPlaying) {
-                            binding.seekBar.progress = mp.currentPosition
-                            handler.postDelayed(this, 1000)
-                        }
-                    }
-                }
-            }, 1000)
-
-            binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    if (fromUser) mediaPlayer?.seekTo(progress)
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-
-            player.setOnCompletionListener {
-                isPlaying = false
-                binding.playAudioButton.text = "Reproducir"
-                binding.seekBar.progress = 0
             }
         }
     }
@@ -206,33 +152,14 @@ class CaptureResumeActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val audioPath = database.classDao().getClassById(classId)?.audioPath
             audioPath?.let {
-                audioUri = Uri.parse(it)
-                if (isUriAccessible(audioUri!!)) {
-                    withContext(Dispatchers.Main) {
-                        binding.audioStatus.text = "Audio cargado"
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@CaptureResumeActivity, "El audio guardado no es accesible", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                audioHelper.setAudioUri(Uri.parse(it))
             }
         }
     }
 
-    private fun isUriAccessible(uri: Uri): Boolean {
-        return try {
-            contentResolver.openFileDescriptor(uri, "r")?.use { true } ?: false
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.release()
-        handler.removeCallbacksAndMessages(null)
+        audioHelper.release()
     }
 
 
@@ -275,7 +202,7 @@ class CaptureResumeActivity : ComponentActivity() {
                 val firstImagePath = imageList.first().imagePath
                 val base64Image = encodeImageToBase64(firstImagePath)
 
-                sendImageToGPT4(base64Image) { response ->
+                gptHelper.sendImageToGPT4(base64Image) { response ->
                     // Actualizar el nombre de la clase y marcar isLabelGenerated como true
                     updateClassName(response)
                 }
@@ -296,64 +223,12 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-
     // Codifica la imagen a Base64
     private fun encodeImageToBase64(imagePath: String): String {
         val bitmap = BitmapFactory.decodeFile(imagePath)
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-    }
-
-    // Envía la imagen a la API de GPT-4 para obtener una etiqueta
-    private fun sendImageToGPT4(base64Image: String, callback: (String) -> Unit) {
-        val url = GPTConfig.BASE_URL
-        val apiKey = GPTConfig.CHAT_GPT_API_KEY
-        val requestBody = """
-            {
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Genera un nombre descriptivo de esta imagen en español de no más de 15 caracteres."},
-                            {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,$base64Image"}}
-                        ]
-                    }
-                ],
-                "max_tokens": 300
-            }
-        """.trimIndent()
-
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e("Error", "API request failed", e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                    try {
-                        val jsonObject = JSONObject(responseBody)
-                        val choicesArray = jsonObject.getJSONArray("choices")
-                        val generatedLabel = choicesArray
-                            .getJSONObject(0)
-                            .getJSONObject("message")
-                            .getString("content")
-                        callback(generatedLabel)
-                    } catch (e: JSONException) {
-                        Log.e("Error", "Failed to parse JSON", e)
-                    }
-                }
-            }
-        })
     }
 
     private fun toggleSelection(imageItem: ImageItem) {
