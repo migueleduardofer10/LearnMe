@@ -28,31 +28,29 @@ class CameraHelper(
         val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-            val preview =
-                Preview.Builder()
-                    .setTargetRotation(previewView.display.rotation)
-                    .build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
-                    }
+            // Verifica que el display no sea null
+            val rotation = previewView.display?.rotation ?: android.view.Surface.ROTATION_0
 
-            // ImageAnalysis. Using RGBA 8888 to match how our models work
-            imageAnalyzer =
-                ImageAnalysis.Builder()
-                    .setTargetRotation(previewView.display.rotation)
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                    .build().also {
-                        if (isInferenceMode) {
-                            it.setAnalyzer(cameraExecutor) { image ->
-//                                Log.d("InferenceResult", "Inferencia iniciada y en progreso")
-                                onImageCaptured(image)  // Envía el ImageProxy a la actividad
-                                image.close()
-                            }
+            val preview = Preview.Builder()
+                .setTargetRotation(rotation)  // Usa rotación con verificación de null
+                .build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+            imageAnalyzer = ImageAnalysis.Builder()
+                .setTargetRotation(rotation)  // Usa rotación con verificación de null
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                .build().also {
+                    if (isInferenceMode) {
+                        it.setAnalyzer(cameraExecutor) { image ->
+                            onImageCaptured(image)  // Envía el ImageProxy a la actividad
+                            image.close()
                         }
                     }
+                }
 
             try {
                 cameraProvider.unbindAll()
