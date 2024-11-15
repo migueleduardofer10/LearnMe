@@ -8,8 +8,8 @@ import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ClassEntity
 import com.example.learnme.databinding.ActivityTrainingLoadBinding
-import com.example.learnme.fragment.TransferLearning
-import com.example.learnme.fragment.TransferLearningManager
+import com.example.learnme.helper.TransferLearning
+import com.example.learnme.helper.TransferLearningManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

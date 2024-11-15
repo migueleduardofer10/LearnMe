@@ -16,10 +16,10 @@ import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityDataCaptureBinding
-import com.example.learnme.fragment.CameraHelper
+import com.example.learnme.helper.CameraHelper
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
-import com.example.learnme.fragment.CameraPermissionsManager
+import com.example.learnme.helper.CameraPermissionsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -125,7 +125,7 @@ class DataCaptureActivity : ComponentActivity() {
     private fun loadCapturedImages() {
         CoroutineScope(Dispatchers.IO).launch {
             val images = imageDao.getImagesForClass(classId)
-            val tempImageList = images.map { ImageItem(it.imagePath, it.classId) }
+            val tempImageList = images.map { ImageItem(it.imagePath) }
 
             withContext(Dispatchers.Main) {
                 imageList.clear()
@@ -165,7 +165,7 @@ class DataCaptureActivity : ComponentActivity() {
             imageDao.insertImage(imageItem)  // Guardar imagen en la base de datos
 
             withContext(Dispatchers.Main) {
-                imageList.add(ImageItem(imageFile.path, classId))
+                imageList.add(ImageItem(imageFile.path))
                 adapter.notifyItemInserted(imageList.size - 1)
             }
         }

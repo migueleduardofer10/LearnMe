@@ -2,13 +2,9 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,7 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.databinding.ActivityAudioBinding
-import com.example.learnme.fragment.AudioHelper
+import com.example.learnme.helper.AudioHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

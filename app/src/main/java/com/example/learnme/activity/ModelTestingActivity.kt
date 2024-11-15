@@ -10,10 +10,10 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.lifecycleScope
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.databinding.ActivityModelTestingBinding
-import com.example.learnme.fragment.CameraHelper
-import com.example.learnme.fragment.CameraPermissionsManager
-import com.example.learnme.fragment.TransferLearning
-import com.example.learnme.fragment.TransferLearningManager
+import com.example.learnme.helper.CameraHelper
+import com.example.learnme.helper.CameraPermissionsManager
+import com.example.learnme.helper.TransferLearning
+import com.example.learnme.helper.TransferLearningManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category

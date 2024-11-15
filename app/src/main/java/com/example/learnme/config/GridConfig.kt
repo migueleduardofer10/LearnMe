@@ -3,7 +3,7 @@ package com.example.learnme.config
 import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.learnme.fragment.GridSpacingItemDecoration
+import com.example.learnme.helper.GridSpacingItemDecoration
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
 
