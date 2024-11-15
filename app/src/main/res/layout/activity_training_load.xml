@@ -25,6 +25,14 @@
         android:text="Cargando"
         style="@style/Headline5"/>
 
+    <TextView
+        android:id="@+id/tvLossConsumer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Loss: 0.000"
+        style="@style/Paragraph"/>
+
     <Button
         android:id="@+id/stopButton"
         android:layout_marginTop="86dp"

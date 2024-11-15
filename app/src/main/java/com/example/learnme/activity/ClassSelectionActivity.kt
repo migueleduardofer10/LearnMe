@@ -2,58 +2,92 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.learnme.fragments.ItemAdapter
-import com.example.learnme.fragments.ItemClass
-import com.example.learnme.R
+import com.example.learnme.data.AppDatabase
+import com.example.learnme.data.ClassDao
+import com.example.learnme.data.ClassEntity
+import com.example.learnme.adapter.ItemAdapter
+import com.example.learnme.adapter.ItemClass
+import com.example.learnme.databinding.ActivityClassSelectionBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener{
+
+    private lateinit var binding: ActivityClassSelectionBinding
+
+    private lateinit var itemList: MutableList<ItemClass>
+    private lateinit var adapter: ItemAdapter
+
+    private lateinit var database: AppDatabase
+    private lateinit var classDao: ClassDao
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_class_selection)
+        database = AppDatabase.getInstance(this)
+        classDao = database.classDao()
 
-        // Lista de datos de ejemplo
-        val itemList = listOf(
-            ItemClass("Clase 1"),
-            ItemClass("Clase 2"),
-            ItemClass("Clase 3"),
-            ItemClass("Clase 4"),
-            ItemClass("Clase 5"),
-        )
+        binding = ActivityClassSelectionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // Configurar el RecyclerView
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewItems)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = ItemAdapter(itemList, this)
+        // Cargar lista de clases en un hilo en segundo plano
+        CoroutineScope(Dispatchers.IO).launch {
+            val classes = classDao.getAllClasses().map { ItemClass(it.className, it.classId) }
+            withContext(Dispatchers.Main) {
+                itemList = classes.toMutableList()
+                setupRecyclerView()
+            }
+        }
 
-        val nextButton = findViewById<Button>(R.id.nextButton)
-
-        nextButton.setOnClickListener {
+        binding.nextButton.setOnClickListener {
             val intent = Intent(this, Step2Activity::class.java)
             startActivity(intent)
         }
 
-        // Botón para agregar una nueva clase
-        // val newClassButton = findViewById<Button>(R.id.newClassButton)
-
-
-
+        binding.newClassButton.setOnClickListener {
+            addNewClass()
+        }
     }
 
-    // Manejar clics en los botones
-    override fun onBackClicked(position: Int) {
-        // Acción para el botón "Volver"
+    private fun setupRecyclerView() {
+        binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
+        adapter = ItemAdapter(itemList, this)
+        binding.recyclerViewItems.adapter = adapter
     }
 
-    override fun onUploadClicked(position: Int) {
-        // Acción para el botón "Subir"
+    // Agregar nueva clase de forma asíncrona
+    private fun addNewClass() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val newClass = ClassEntity(className = "Clase ${itemList.size + 1}")
+            val classId = classDao.insertClass(newClass).toInt()
+
+            withContext(Dispatchers.Main) {
+                itemList.add(ItemClass("Clase $classId", classId))
+                adapter.notifyItemInserted(itemList.size - 1)
+            }
+        }
     }
 
-    override fun onEditClicked(position: Int) {
-        // Acción para el botón "Editar"
+    override fun onCameraClicked(classId: Int) {
+        val intent = Intent(this, DataCaptureActivity::class.java)
+        intent.putExtra("classId", classId)
+        startActivity(intent)
     }
+
+    override fun onUploadClicked(classId: Int) {
+        val intent = Intent(this, ImageGalleryActivity::class.java)
+        intent.putExtra("classId", classId)
+        startActivity(intent)
+    }
+
+    override fun onEditClicked(classId: Int) {
+        val intent = Intent(this, CaptureResumeActivity::class.java)
+        intent.putExtra("classId", classId)
+        startActivity(intent)
+    }
+
 }
