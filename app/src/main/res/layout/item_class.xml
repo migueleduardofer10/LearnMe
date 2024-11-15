@@ -29,12 +29,7 @@
             android:text="Muestras: ¿?"
             style="@style/Paragraph"/>
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Color de la clase"
-            android:background="@drawable/btn_round"
-            android:backgroundTint="@color/principal"/>
+
 
     </LinearLayout>
 
@@ -64,6 +59,12 @@
             android:contentDescription="Botón con ícono de editar"
             style="@style/button_3_blank"/>
 
+        <ImageButton
+            android:id="@+id/audioButton"
+            android:src="@drawable/ic_audio_32px"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="Botón de audio"
+            style="@style/button_3_blank"/>
 
     </LinearLayout>
 </LinearLayout>

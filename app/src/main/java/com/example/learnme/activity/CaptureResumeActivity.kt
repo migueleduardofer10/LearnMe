@@ -3,10 +3,16 @@ package com.example.learnme.activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ImageDao
@@ -16,6 +22,8 @@ import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
+import com.example.learnme.fragment.AudioHelper
+import com.example.learnme.fragment.GPT4Helper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,9 +50,16 @@ class CaptureResumeActivity : ComponentActivity() {
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
-
     private lateinit var database: AppDatabase
     private lateinit var imageDao: ImageDao
+
+    private lateinit var audioHelper: AudioHelper
+    private lateinit var gptHelper: GPT4Helper
+
+    private var mediaPlayer: MediaPlayer? = null
+    private var isPlaying = false
+    private var audioUri: Uri? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,8 +74,18 @@ class CaptureResumeActivity : ComponentActivity() {
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
 
+        gptHelper = GPT4Helper(client)
+        audioHelper = AudioHelper(
+            context = this,
+            contentResolver = contentResolver,
+            audioStatusView = binding.audioStatus,
+            playAudioButton = binding.playAudioButton,
+            seekBar = binding.seekBar
+        )
+
         // Obtener el nombre de la clase desde la base de datos y mostrarlo en la UI
         loadClassName()
+        loadSavedAudio()
 
         // Configurar el RecyclerView
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
@@ -111,15 +136,41 @@ class CaptureResumeActivity : ComponentActivity() {
             intent.putExtra("classId", classId)
             startActivity(intent)
         }
+
+        binding.playAudioButton.setOnClickListener {
+            binding.playAudioButton.setOnClickListener {
+                if (audioHelper.isPlaying) {
+                    audioHelper.pauseAudio()
+                } else {
+                    audioHelper.playAudio()
+                }
+            }
+        }
     }
 
-    // Cargar el nombre de la clase desde la base de datos
+    private fun loadSavedAudio() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val audioPath = database.classDao().getClassById(classId)?.audioPath
+            audioPath?.let {
+                audioHelper.setAudioUri(Uri.parse(it))
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioHelper.release()
+    }
+
+
     private fun loadClassName() {
         CoroutineScope(Dispatchers.IO).launch {
-            val className = database.classDao().getClassNameById(classId) ?: "Clase $classId"
+            val classEntity = database.classDao().getClassById(classId)
+
+            val className = classEntity?.className ?: "Clase desconocida"
 
             withContext(Dispatchers.Main) {
-                binding.nameEditText.text = className
+                binding.nameEditText.setText(className)
             }
         }
     }
@@ -151,7 +202,7 @@ class CaptureResumeActivity : ComponentActivity() {
                 val firstImagePath = imageList.first().imagePath
                 val base64Image = encodeImageToBase64(firstImagePath)
 
-                sendImageToGPT4(base64Image) { response ->
+                gptHelper.sendImageToGPT4(base64Image) { response ->
                     // Actualizar el nombre de la clase y marcar isLabelGenerated como true
                     updateClassName(response)
                 }
@@ -159,13 +210,16 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-    // Actualizar el nombre de la clase en la base de datos
+    // Actualizar el nombre de la clase en la base de datos y la UI
     private fun updateClassName(newName: String) {
+        val trimmedName = newName.trim().replace("\"", "")
+
+        CoroutineScope(Dispatchers.Main).launch {
+            binding.nameEditText.setText(trimmedName)  // Actualiza el nombre en la UI
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
-            database.classDao().updateClassName(classId, newName)
-            withContext(Dispatchers.Main) {
-                binding.nameEditText.text = newName  // Actualizar en la interfaz
-            }
+            database.classDao().updateClassName(classId, trimmedName)
         }
     }
 
@@ -175,57 +229,6 @@ class CaptureResumeActivity : ComponentActivity() {
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
-    }
-
-    // Envía la imagen a la API de GPT-4 para obtener una etiqueta
-    private fun sendImageToGPT4(base64Image: String, callback: (String) -> Unit) {
-        val url = GPTConfig.BASE_URL
-        val apiKey = GPTConfig.CHAT_GPT_API_KEY
-        val requestBody = """
-            {
-                "model": "gpt-4o-mini",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Genera un nombre descriptivo de esta imagen en español de no más de 15 caracteres."},
-                            {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,$base64Image"}}
-                        ]
-                    }
-                ],
-                "max_tokens": 300
-            }
-        """.trimIndent()
-
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Authorization", "Bearer $apiKey")
-            .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e("Error", "API request failed", e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                if (responseBody != null) {
-                    try {
-                        val jsonObject = JSONObject(responseBody)
-                        val choicesArray = jsonObject.getJSONArray("choices")
-                        val generatedLabel = choicesArray
-                            .getJSONObject(0)
-                            .getJSONObject("message")
-                            .getString("content")
-                        callback(generatedLabel)
-                    } catch (e: JSONException) {
-                        Log.e("Error", "Failed to parse JSON", e)
-                    }
-                }
-            }
-        })
     }
 
     private fun toggleSelection(imageItem: ImageItem) {

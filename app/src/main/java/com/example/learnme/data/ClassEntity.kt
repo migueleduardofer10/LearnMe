@@ -11,7 +11,8 @@ data class ClassEntity(
     @PrimaryKey(autoGenerate = true) val classId: Int = 0,
     @ColumnInfo(name = "class_name") val className: String,
 //    @ColumnInfo(name = "description") val description: String
-    @ColumnInfo(name = "isLabelGenerated")var isLabelGenerated: Boolean = false
+    @ColumnInfo(name = "isLabelGenerated")var isLabelGenerated: Boolean = false,
+    @ColumnInfo(name = "audio_path") var audioPath: String? = null
 
 )
 
@@ -29,5 +30,4 @@ data class ImageEntity(
     @PrimaryKey(autoGenerate = true) val imageId: Int = 0,
     @ColumnInfo(name = "image_path") val imagePath: String,
     @ColumnInfo(name = "classId") val classId: Int,
-//    @ColumnInfo(name = "rotation") val rotation: Int
 )
