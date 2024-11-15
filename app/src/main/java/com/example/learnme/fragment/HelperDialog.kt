@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.learnme.fragments
+package com.example.learnme.fragment
 
 import android.app.Dialog
 import android.os.Bundle

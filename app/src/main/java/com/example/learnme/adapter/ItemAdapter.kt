@@ -1,4 +1,4 @@
-package com.example.learnme.fragments
+package com.example.learnme.adapter
 
 
 import android.view.LayoutInflater
@@ -10,27 +10,31 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
 
 // Modelo de datos
-data class ItemClass(val title: String)
+data class ItemClass(val className: String, val classId: Int)
 
-class ItemAdapter(private val itemList: List<ItemClass>, private val itemClickListener: OnItemClickListener) :
+class ItemAdapter(
+    private val itemList: List<ItemClass>,
+    private val itemClickListener: OnItemClickListener
+) :
     RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
     // Interfaz para manejar los clics en los botones
     interface OnItemClickListener {
-        fun onBackClicked(position: Int)
-        fun onUploadClicked(position: Int)
-        fun onEditClicked(position: Int)
+        fun onCameraClicked(classId: Int)
+        fun onUploadClicked(classId: Int)
+        fun onEditClicked(classId: Int)
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val titleTextView: TextView = itemView.findViewById(R.id.classNameText)
+        val className: TextView = itemView.findViewById(R.id.classNameText)
         val cameraButton: ImageButton = itemView.findViewById(R.id.cameraButton)
         val uploadButton: ImageButton = itemView.findViewById(R.id.uploadButton)
         val editButton: ImageButton = itemView.findViewById(R.id.editButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_class, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_class, parent, false)
         return ItemViewHolder(itemView)
     }
 
@@ -38,18 +42,19 @@ class ItemAdapter(private val itemList: List<ItemClass>, private val itemClickLi
         val currentItem = itemList[position]
 
         // Asignar los datos a las vistas
-        holder.titleTextView.text = currentItem.title
+        holder.className.text = currentItem.className
 
         // Asignar listeners a los botones
         holder.cameraButton.setOnClickListener {
-            itemClickListener.onBackClicked(position)
+            itemClickListener.onCameraClicked(currentItem.classId)
         }
         holder.uploadButton.setOnClickListener {
-            itemClickListener.onUploadClicked(position)
+            itemClickListener.onUploadClicked(currentItem.classId)
         }
         holder.editButton.setOnClickListener {
-            itemClickListener.onEditClicked(position)
+            itemClickListener.onEditClicked(currentItem.classId)
         }
+
     }
 
     override fun getItemCount(): Int {
