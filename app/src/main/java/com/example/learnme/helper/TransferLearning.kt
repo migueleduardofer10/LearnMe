@@ -1,4 +1,4 @@
-package com.example.learnme.fragment
+package com.example.learnme.helper
 
 import android.content.Context
 import android.graphics.Bitmap

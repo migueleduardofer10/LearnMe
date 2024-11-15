@@ -9,37 +9,24 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
-import android.util.Log
 import android.view.View
-import android.widget.SeekBar
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ImageDao
 import com.example.learnme.R
-import com.example.learnme.config.GPTConfig
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
-import com.example.learnme.fragment.AudioHelper
-import com.example.learnme.fragment.GPT4Helper
+import com.example.learnme.helper.AudioHelper
+import com.example.learnme.helper.GPT4Helper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
 
 class CaptureResumeActivity : ComponentActivity() {
 
@@ -55,11 +42,6 @@ class CaptureResumeActivity : ComponentActivity() {
 
     private lateinit var audioHelper: AudioHelper
     private lateinit var gptHelper: GPT4Helper
-
-    private var mediaPlayer: MediaPlayer? = null
-    private var isPlaying = false
-    private var audioUri: Uri? = null
-    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -179,7 +161,7 @@ class CaptureResumeActivity : ComponentActivity() {
     private fun loadImagesForClass(onImagesLoaded: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val images = imageDao.getImagesForClass(classId)
-            val tempImageList = images.map { ImageItem(it.imagePath, it.classId) }
+            val tempImageList = images.map { ImageItem(it.imagePath) }
 
             withContext(Dispatchers.Main) {
                 imageList.clear()

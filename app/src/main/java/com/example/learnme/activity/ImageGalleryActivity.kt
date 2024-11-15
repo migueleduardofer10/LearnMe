@@ -9,8 +9,8 @@ import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityImageGaleryBinding
-import com.example.learnme.fragment.GalleryPermissionsManager
-import com.example.learnme.fragment.GalleryHelper
+import com.example.learnme.helper.GalleryPermissionsManager
+import com.example.learnme.helper.GalleryHelper
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
 import kotlinx.coroutines.CoroutineScope
