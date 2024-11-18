@@ -70,7 +70,7 @@ class GPT4HelperTest {
     }
 
     @Test
-    //sendImageToGPT4 debería manejar errores de la API
+    //Cuando la API devuelve un error, se espera una respuesta nula
     fun `sendImageToGPT4 should handle API errors`() = runBlocking {
         // Configurar una respuesta de error para el servidor
         mockWebServer.enqueue(
@@ -93,7 +93,7 @@ class GPT4HelperTest {
     }
 
     @Test
-    //sendImageToGPT4 debe manejar una respuesta no válida
+    //Cuando la respuesta JSON no es válida, se espera una respuesta nula
     fun `sendImageToGPT4 should handle invalid JSON response`() = runBlocking {
         // Configurar una respuesta con JSON no válido
         mockWebServer.enqueue(
