@@ -26,7 +26,7 @@ import java.util.concurrent.Executors
 import kotlin.math.max
 import kotlin.math.min
 
-class TransferLearning (
+class TransferLearningHelper (
     var numThreads: Int = 2,
     val context: Context,
     var classifierListener: ClassifierListener?, //Es una interfaz

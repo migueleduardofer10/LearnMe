@@ -5,11 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
-import com.example.learnme.data.ClassDao
-import com.example.learnme.data.ClassEntity
 import com.example.learnme.adapter.ItemAdapter
 import com.example.learnme.adapter.ItemClass
 import com.example.learnme.databinding.ActivityClassSelectionBinding
+import com.example.learnme.service.ClassService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,27 +18,22 @@ import kotlinx.coroutines.withContext
 class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener{
 
     private lateinit var binding: ActivityClassSelectionBinding
-
     private lateinit var itemList: MutableList<ItemClass>
     private lateinit var adapter: ItemAdapter
 
-    private lateinit var database: AppDatabase
-    private lateinit var classDao: ClassDao
+    private lateinit var classService: ClassService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        database = AppDatabase.getInstance(this)
-        classDao = database.classDao()
+        val database = AppDatabase.getInstance(this)
+        classService = ClassService(database)
 
         binding = ActivityClassSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Cargar lista de clases en un hilo en segundo plano
         CoroutineScope(Dispatchers.IO).launch {
-            val classes = classDao.getAllClasses().map { classEntity ->
-                val sampleCount = database.imageDao().getImageCountForClass(classEntity.classId)
-                ItemClass(classEntity.className, classEntity.classId, sampleCount)
-            }
+            val classes = classService.getAllClasses()
             withContext(Dispatchers.Main) {
                 itemList = classes.toMutableList()
                 setupRecyclerView()
@@ -52,7 +46,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         }
 
         binding.newClassButton.setOnClickListener {
-            addNewClass()
+            handleAddNewClass()
         }
     }
 
@@ -63,13 +57,12 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
     }
 
     // Agregar nueva clase de forma asíncrona
-    private fun addNewClass() {
+    private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
-            val newClass = ClassEntity(className = "Clase ${itemList.size + 1}")
-            val classId = classDao.insertClass(newClass).toInt()
+            val newClass = classService.addNewClass(itemList)
 
             withContext(Dispatchers.Main) {
-                itemList.add(ItemClass("Clase $classId", classId, 0))
+                itemList.add(newClass)
                 adapter.notifyItemInserted(itemList.size - 1)
             }
         }

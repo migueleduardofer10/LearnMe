@@ -2,8 +2,6 @@ package com.example.learnme.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,8 +9,6 @@ import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.camera.core.ImageProxy
 import com.example.learnme.data.AppDatabase
-import com.example.learnme.data.ImageDao
-import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityDataCaptureBinding
@@ -20,12 +16,11 @@ import com.example.learnme.helper.CameraHelper
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
 import com.example.learnme.helper.CameraPermissionsManager
+import com.example.learnme.service.ImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 
 class DataCaptureActivity : ComponentActivity() {
@@ -38,8 +33,8 @@ class DataCaptureActivity : ComponentActivity() {
     private var isCapturing = false
     private var classId: Int = -1
 
-    private lateinit var database: AppDatabase
-    private lateinit var imageDao: ImageDao
+    private lateinit var imageService: ImageService
+
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,8 +45,9 @@ class DataCaptureActivity : ComponentActivity() {
 
 
         // Configurar la base de datos y el DAO
-        database = AppDatabase.getInstance(this)
-        imageDao = database.imageDao()
+        val database = AppDatabase.getInstance(this)
+        imageService = ImageService(database)
+
 
         // Obtén el classId del Intent
         classId = intent.getIntExtra("classId", -1)  // -1 es un valor por defecto
@@ -124,16 +120,11 @@ class DataCaptureActivity : ComponentActivity() {
     // Cargar imágenes desde la base de datos
     private fun loadCapturedImages() {
         CoroutineScope(Dispatchers.IO).launch {
-            val images = imageDao.getImagesForClass(classId)
-            val tempImageList = images.map { ImageItem(it.imagePath) }
+            val tempImageList = imageService.getImagesForClass(classId)
 
             withContext(Dispatchers.Main) {
                 imageList.clear()
-                imageList.addAll(
-                    tempImageList.sortedBy { imageItem ->
-                        File(imageItem.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
-                    }
-                )
+                imageList.addAll(tempImageList)
                 adapter.notifyDataSetChanged()
             }
         }
@@ -141,31 +132,12 @@ class DataCaptureActivity : ComponentActivity() {
 
     // Procesar y guardar ImageProxy en un archivo
     private fun processAndSaveImage(imageProxy: ImageProxy) {
-        val imageFile = File(externalMediaDirs.first(), "${System.currentTimeMillis()}.jpg")
-        val bitmap = Bitmap.createBitmap(imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888)
-        bitmap.copyPixelsFromBuffer(imageProxy.planes[0].buffer)
-
-        // Obtener la rotación de la imagen desde el `imageProxy`
-        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-        val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, Matrix().apply {
-            postRotate(rotationDegrees.toFloat())
-        }, true)
-
-        // Guardar el `rotatedBitmap` en lugar del `bitmap` original
-        FileOutputStream(imageFile).use { outputStream ->
-            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        }
-
-        // Cerrar ImageProxy después de procesar
-        imageProxy.close()
-
-        // Guardar en la base de datos y actualizar la interfaz de usuario
+        val externalMediaDir = externalMediaDirs.first()
         CoroutineScope(Dispatchers.IO).launch {
-            val imageItem = ImageEntity(imagePath = imageFile.path, classId = classId)
-            imageDao.insertImage(imageItem)  // Guardar imagen en la base de datos
+            val imagePath = imageService.processAndSaveImage(imageProxy, classId, externalMediaDir)
 
             withContext(Dispatchers.Main) {
-                imageList.add(ImageItem(imageFile.path))
+                imageList.add(ImageItem(imagePath))
                 adapter.notifyItemInserted(imageList.size - 1)
             }
         }

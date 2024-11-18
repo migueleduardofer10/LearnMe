@@ -1,4 +1,4 @@
-package com.example.learnme.helper
+package com.example.learnme.service
 
 import android.content.ContentResolver
 import android.content.Context
@@ -16,9 +16,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
-class GalleryHelperTest {
+class GalleryServiceTest {
 
-    private lateinit var galleryHelper: GalleryHelper
+    private lateinit var galleryService: GalleryService
     private lateinit var mockContext: Context
     private lateinit var mockContentResolver: ContentResolver
     private lateinit var mockCursor: Cursor
@@ -43,10 +43,11 @@ class GalleryHelperTest {
         )).thenReturn(mockCursor)
 
         // Instanciar el GalleryHelper con el contexto simulado
-        galleryHelper = GalleryHelper(mockContext)
+        galleryService = GalleryService(mockContext)
     }
 
     @Test
+    //Cuando "cursor" es nulo, la función debe devolver una lista vacía.
     fun `loadImagesFromGallery returns empty list when cursor is null`() {
         `when`(mockContentResolver.query(
             eq(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
@@ -56,22 +57,23 @@ class GalleryHelperTest {
             anyString()
         )).thenReturn(null)
 
-        val images = galleryHelper.loadImagesFromGallery()
+        val images = galleryService.loadImagesFromGallery()
 
         assertEquals(0, images.size)
     }
 
     @Test
+    //Cuando "cursor" no contiene datos, la función debe devolver una lista vacía.
     fun `loadImagesFromGallery returns empty list when cursor has no data`() {
-        // Configurar el cursor para que no contenga datos
         `when`(mockCursor.moveToNext()).thenReturn(false)
 
-        val images = galleryHelper.loadImagesFromGallery()
+        val images = galleryService.loadImagesFromGallery()
 
         assertEquals(0, images.size)
     }
 
     @Test
+    //Cuando "cursor" contiene datos, la función debe cargar las imágenes correctamente en la lista.
     fun `loadImagesFromGallery returns list of images when cursor has data`() {
         // Simular una lista de rutas de imágenes
         val imagePath = "/path/to/image.jpg"
@@ -79,7 +81,7 @@ class GalleryHelperTest {
         `when`(mockCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)).thenReturn(0)
         `when`(mockCursor.getString(0)).thenReturn(imagePath)
 
-        val images = galleryHelper.loadImagesFromGallery()
+        val images = galleryService.loadImagesFromGallery()
 
         // Verificar que se ha cargado la imagen correctamente en la lista
         assertEquals(1, images.size)
@@ -87,8 +89,9 @@ class GalleryHelperTest {
     }
 
     @Test
+    //Después de usar el cursor, se debe cerrar para liberar recursos.
     fun `loadImagesFromGallery closes cursor after use`() {
-        galleryHelper.loadImagesFromGallery()
+        galleryService.loadImagesFromGallery()
 
         // Verificar que el cursor se cierra después de su uso
         verify(mockCursor).close()
