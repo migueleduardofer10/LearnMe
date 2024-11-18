@@ -11,11 +11,37 @@ class ClassService(private val database: AppDatabase) {
     private val classDao: ClassDao = database.classDao()
     private val imageDao: ImageDao = database.imageDao()
 
+    fun initializeDefaultClasses() {
+        val existingClasses = classDao.getAllClasses()
+        if (existingClasses.isEmpty()) {
+            // Lista de nombres de clases por defecto
+            val defaultClasses = listOf(
+                "Clase 1",
+                "Clase 2",
+                "Clase 3",
+                "Clase 4",
+                "Clase Desconocido"
+            )
+
+            // Insertar las clases por defecto en la base de datos
+            defaultClasses.forEach { className ->
+                val newClass = ClassEntity(className = className)
+                classDao.insertClass(newClass)
+            }
+        }
+    }
+
+
     fun addNewClass(): ItemClass {
         val currentClassCount = getClassCount()
-        val newClassName = "Clase ${currentClassCount + 1}"
 
+        if (currentClassCount >= 5) {
+            throw IllegalStateException("No se pueden agregar más de 5 clases.")
+        }
+
+        val newClassName = "Clase ${currentClassCount}"
         val newClass = ClassEntity(className = newClassName)
+
         val classId = classDao.insertClass(newClass).toInt()
 
         return ItemClass(newClassName, classId, 0)
@@ -27,7 +53,10 @@ class ClassService(private val database: AppDatabase) {
     // Obtener todas las clases con el conteo de muestras asociado
     fun getAllClasses(): List<ItemClass> {
         val classes = classDao.getAllClasses()
-        return classes.map { classEntity ->
+        val sortedClasses = classes.sortedBy { classEntity ->
+            if (classEntity.className == "Clase Desconocido") Int.MAX_VALUE else classEntity.classId
+        }
+        return sortedClasses.map { classEntity ->
             val sampleCount = imageDao.getImageCountForClass(classEntity.classId)
             ItemClass(classEntity.className, classEntity.classId, sampleCount)
         }

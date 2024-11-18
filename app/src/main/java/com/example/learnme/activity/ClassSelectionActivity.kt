@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import android.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
@@ -33,17 +34,19 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding = ActivityClassSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Cargar lista de clases en un hilo en segundo plano
+        // Inicializar clases por defecto y cargar lista de clases
         CoroutineScope(Dispatchers.IO).launch {
+            classService.initializeDefaultClasses() // Esto se ejecuta en un hilo secundario
+
+            // Obtener la lista de clases después de inicializar
             val classes = classService.getAllClasses()
             withContext(Dispatchers.Main) {
                 itemList = classes.toMutableList()
-                setupRecyclerView()
+                setupRecyclerView() // Configurar RecyclerView en el hilo principal
             }
         }
-
         binding.nextButton.setOnClickListener {
-            validateClassesBeforeProceeding()
+            validateClassCountBeforeProceeding()
         }
 
         binding.newClassButton.setOnClickListener {
@@ -55,29 +58,68 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
         adapter = ItemAdapter(itemList, this)
         binding.recyclerViewItems.adapter = adapter
+        refreshClasses()
     }
 
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
-            val newClass = classService.addNewClass()
+            if (itemList.size >= 5) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Límite alcanzado")
+                        .setMessage("Solo puedes tener 5 clases, incluyendo 'Clase Desconocido'.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+                return@launch
+            }
 
-            withContext(Dispatchers.Main) {
-                itemList.add(newClass)
-                adapter.notifyItemInserted(itemList.size - 1)
+            try {
+                val newClass = classService.addNewClass()
+                refreshClasses()
+            } catch (e: IllegalStateException) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Error")
+                        .setMessage(e.message)
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
             }
         }
     }
 
-    private fun validateClassesBeforeProceeding() {
+    private fun refreshClasses() {
         CoroutineScope(Dispatchers.IO).launch {
-            // Obtiene las clases que no tienen imágenes
-            val incompleteClasses = classService.getClassesWithoutImages()
+            val classes = classService.getAllClasses()
+            withContext(Dispatchers.Main) {
+                itemList.clear()
+                itemList.addAll(classes)
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+    private fun validateClassCountBeforeProceeding() {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (itemList.size != 5) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Clases incompletas")
+                        .setMessage("Debes tener exactamente 5 clases, incluyendo 'Clase Desconocido', para continuar.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+                return@launch
+            }
 
+            val incompleteClasses = classService.getClassesWithoutImages()
             withContext(Dispatchers.Main) {
                 if (incompleteClasses.isNotEmpty()) {
                     showIncompleteClassesAlert(incompleteClasses)
                 } else {
-                    // Si todas las clases tienen al menos una foto, procede
                     val intent = Intent(this@ClassSelectionActivity, Step2Activity::class.java)
                     startActivity(intent)
                 }
@@ -89,7 +131,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         val classNames = incompleteClasses.joinToString("\n") { it.className }
         val message = "Las siguientes clases no cuentan con una imagen:\n\n$classNames"
 
-        val alertDialog = android.app.AlertDialog.Builder(this)
+        val alertDialog = AlertDialog.Builder(this)
             .setTitle("Clases incompletas")
             .setMessage(message)
             .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
@@ -125,17 +167,30 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onDeleteClicked(classId: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            classService.deleteImagesByClassId(classId)
-
-            classService.deleteClass(classId)
+            val className = classService.getClassName(classId)
 
             withContext(Dispatchers.Main) {
-                val removedIndex = itemList.indexOfFirst { it.classId == classId }
-                if (removedIndex != -1) {
-                    itemList.removeAt(removedIndex)
-                    adapter.notifyItemRemoved(removedIndex)
+                if (className == "Clase Desconocido") {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Acción no permitida")
+                        .setMessage("No puedes eliminar la clase 'Clase Desconocido'.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                    return@withContext
+                }
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    classService.deleteImagesByClassId(classId)
+                    classService.deleteClass(classId)
+
+                    withContext(Dispatchers.Main) {
+                        refreshClasses()
+                    }
                 }
             }
         }
     }
+
+
 }
