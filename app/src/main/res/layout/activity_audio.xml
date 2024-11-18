@@ -12,6 +12,15 @@
         android:paddingVertical="50dp"
         android:layout_above="@id/buttonLayout">
 
+        <!-- Sección del nombre de la clase -->
+        <TextView
+            android:id="@+id/nameTextView"
+            style="@style/Headline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clase 1"
+            android:layout_marginBottom="20dp" />
+
         <!-- Sección de carga y grabación de audio -->
         <LinearLayout
             android:layout_width="match_parent"
