@@ -1,15 +1,12 @@
 package com.example.learnme.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
 import android.view.View
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
-import com.example.learnme.data.ImageDao
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityCaptureResumeBinding
@@ -228,6 +225,7 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUIForSelectionMode() {
         binding.fileCountTextView.text = "Seleccionar"
         binding.hamburgerButton.visibility = View.GONE
@@ -235,6 +233,7 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.cancelButton.visibility = View.VISIBLE
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUIForNormalMode() {
         binding.fileCountTextView.text = "Imágenes capturadas"
         binding.hamburgerButton.visibility = View.VISIBLE

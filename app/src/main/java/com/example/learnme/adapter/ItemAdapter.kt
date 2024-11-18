@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.learnme.R
 
 // Modelo de datos
-data class ItemClass(val className: String, val classId: Int,    var sampleCount: Int = 0  )
+data class ItemClass(val className: String, val classId: Int, var sampleCount: Int = 0  )
 
 class ItemAdapter(
     private val itemList: List<ItemClass>,
