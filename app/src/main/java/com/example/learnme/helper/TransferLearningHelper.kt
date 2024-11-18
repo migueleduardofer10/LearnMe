@@ -38,12 +38,17 @@ class TransferLearningHelper (
 
     //This lock guarantees that only one thread is performing training and
     //inference at any point in time.
+
+    private val classIdToIndex: Map<Int, Int>
+
     private val lock = Any()
     private var targetWidth: Int = 0
     private var targetHeight: Int = 0
     private val handler = Handler(Looper.getMainLooper())
 
     init {
+        classIdToIndex = classes.mapIndexed { index, classEntity -> classEntity.classId to index }.toMap()
+
         if (setupModelPersonalization()) {
             targetWidth = interpreter!!.getInputTensor(0).shape()[2]
             targetHeight = interpreter!!.getInputTensor(0).shape()[1]
@@ -94,7 +99,7 @@ class TransferLearningHelper (
                 trainingSamples.add(
                     TrainingSample(
                         bottleneck,
-                        encoding(classId-1) //Corregir, se relaciona con las clases predefinidas. Podemos pasar directamente el valor INT de la clase
+                        encoding(classId) // Usar el mapeo seguro
                     )
                 )
             }
@@ -138,9 +143,14 @@ class TransferLearningHelper (
     }
 
     // Codifica las clases en un array de floats
-    private fun encoding(id: Int): FloatArray {
+    private fun encoding(classId: Int): FloatArray {
         val classEncoded = FloatArray(classes.size) { 0f }
-        classEncoded[id] = 1f
+        val index = classIdToIndex[classId]
+        if (index != null) {
+            classEncoded[index] = 1f
+        } else {
+            throw IllegalArgumentException("classId $classId no está mapeado a un índice válido")
+        }
         return classEncoded
     }
 

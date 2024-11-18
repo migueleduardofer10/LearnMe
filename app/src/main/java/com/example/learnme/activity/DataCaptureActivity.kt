@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.camera.core.ImageProxy
 import com.example.learnme.data.AppDatabase
@@ -35,6 +36,8 @@ class DataCaptureActivity : ComponentActivity() {
 
     private lateinit var imageService: ImageService
 
+    private var isSelectionMode = false
+    private val selectedImages = mutableListOf<ImageItem>()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +63,11 @@ class DataCaptureActivity : ComponentActivity() {
             spacing = spacing,
             imageList = imageList,
             onItemClick = { imageItem ->
-                // Implementar lógica de eliminación o cualquier otra acción necesaria
+                if (isSelectionMode) {
+                    toggleSelection(imageItem)
+                } else {
+                    // Lógica adicional para clics normales si es necesario
+                }
             }
         )
 
@@ -103,6 +110,12 @@ class DataCaptureActivity : ComponentActivity() {
             intent.putExtra("classId", classId)
             startActivity(intent)
         }
+
+        // Configurar botones para selección y eliminación
+        binding.hamburgerButton.setOnClickListener { enterSelectionMode() }
+        binding.deleteButton.setOnClickListener { deleteSelectedImages() }
+        binding.cancelButton.setOnClickListener { exitSelectionMode() }
+
     }
 
     private fun startContinuousCapture() {
@@ -141,6 +154,56 @@ class DataCaptureActivity : ComponentActivity() {
                 adapter.notifyItemInserted(imageList.size - 1)
             }
         }
+    }
+
+    private fun toggleSelection(imageItem: ImageItem) {
+        if (selectedImages.contains(imageItem)) {
+            selectedImages.remove(imageItem)
+        } else {
+            selectedImages.add(imageItem)
+        }
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun enterSelectionMode() {
+        isSelectionMode = true
+        adapter.isSelectionMode = true
+        updateUIForSelectionMode()
+    }
+
+    private fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedImages.clear()
+        adapter.isSelectionMode = false
+        adapter.notifyDataSetChanged()
+        updateUIForNormalMode()
+    }
+
+    private fun deleteSelectedImages() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val imagePaths = selectedImages.map { it.imagePath }
+            imageService.deleteImagesByPaths(imagePaths)
+
+            withContext(Dispatchers.Main) {
+                imageList.removeAll(selectedImages)
+                adapter.notifyDataSetChanged()
+                exitSelectionMode()
+            }
+        }
+    }
+
+    private fun updateUIForSelectionMode() {
+        binding.fileCountTextView.text = "Seleccionar imágenes"
+        binding.hamburgerButton.visibility = View.GONE
+        binding.deleteButton.visibility = View.VISIBLE
+        binding.cancelButton.visibility = View.VISIBLE
+    }
+
+    private fun updateUIForNormalMode() {
+        binding.fileCountTextView.text = "Imágenes capturadas"
+        binding.hamburgerButton.visibility = View.VISIBLE
+        binding.deleteButton.visibility = View.GONE
+        binding.cancelButton.visibility = View.GONE
     }
 
     override fun onDestroy() {
