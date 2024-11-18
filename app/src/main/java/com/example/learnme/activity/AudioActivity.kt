@@ -52,7 +52,7 @@ class AudioActivity : ComponentActivity() {
 
         classId = intent.getIntExtra("classId", -1)
 
-        Log.d("ClassSelectionActivity", "Valor recibido de classId: $classId")
+        Log.d("AudioActivity", "Valor recibido de classId: $classId")
 
         audioHelper = AudioHelper(
             context = this,
@@ -62,6 +62,8 @@ class AudioActivity : ComponentActivity() {
             seekBar = binding.seekBar
         )
 
+        loadClassName()
+
         binding.previousButton.setOnClickListener {
             val intent = Intent(this, ClassSelectionActivity::class.java)
             startActivity(intent)
@@ -69,7 +71,7 @@ class AudioActivity : ComponentActivity() {
         }
 
         binding.uploadAudioButton.setOnClickListener {
-            stopAudioIfPlayingAndResetProgress() // Detener el reproductor antes de cargar un nuevo audio y reiniciar progreso
+            stopAudioIfPlayingAndResetProgress()
             audioPickerLauncher.launch(arrayOf("audio/*"))
         }
 
@@ -78,14 +80,10 @@ class AudioActivity : ComponentActivity() {
                 stopRecording()
             } else {
                 if (checkPermissions()) {
-                    stopAudioIfPlayingAndResetProgress() // Detener el reproductor antes de iniciar una grabación y reiniciar progreso
+                    stopAudioIfPlayingAndResetProgress()
                     startRecording()
                 }
             }
-        }
-
-        binding.previousButton.setOnClickListener {
-            finish()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -97,6 +95,15 @@ class AudioActivity : ComponentActivity() {
         }
 
         loadSavedAudio()
+    }
+
+    private fun loadClassName() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val className = database.classDao().getClassById(classId)?.className
+            withContext(Dispatchers.Main) {
+                binding.nameTextView.text = className ?: "Clase desconocida"
+            }
+        }
     }
 
     private fun stopAudioIfPlayingAndResetProgress() {

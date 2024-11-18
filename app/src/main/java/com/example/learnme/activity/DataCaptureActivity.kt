@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class DataCaptureActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityDataCaptureBinding
@@ -36,9 +35,7 @@ class DataCaptureActivity : ComponentActivity() {
     private var classId: Int = -1
 
     private lateinit var imageService: ImageService
-
     private var isSelectionMode = false
-    private val selectedImages = mutableListOf<ImageItem>()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +48,10 @@ class DataCaptureActivity : ComponentActivity() {
         val database = AppDatabase.getInstance(this)
         imageService = ImageService(database)
 
-        // Obtén el classId del Intent
+        // Obtener el classId del Intent
         classId = intent.getIntExtra("classId", -1)
 
+        // Configurar el RecyclerView
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         adapter = GridConfig.setupGridWithAdapter(
             recyclerView = binding.recyclerViewImages,
@@ -68,7 +66,7 @@ class DataCaptureActivity : ComponentActivity() {
             }
         )
 
-        // Cargar imágenes desde SharedPreferences
+        // Cargar imágenes desde la base de datos
         loadCapturedImages()
 
         // Inicializar permisos de cámara
@@ -85,6 +83,7 @@ class DataCaptureActivity : ComponentActivity() {
 
         cameraPermissionsManager.checkAndRequestPermission()
 
+        // Configurar botones
         binding.cameraButton.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -170,12 +169,9 @@ class DataCaptureActivity : ComponentActivity() {
             }
         }
     }
+
     private fun toggleSelection(imageItem: ImageItem) {
-        if (selectedImages.contains(imageItem)) {
-            selectedImages.remove(imageItem)
-        } else {
-            selectedImages.add(imageItem)
-        }
+        imageItem.isSelected = !imageItem.isSelected
         adapter.notifyDataSetChanged()
     }
 
@@ -187,14 +183,15 @@ class DataCaptureActivity : ComponentActivity() {
 
     private fun exitSelectionMode() {
         isSelectionMode = false
-        selectedImages.clear()
         adapter.isSelectionMode = false
+        imageList.forEach { it.isSelected = false } // Limpiar selección
         adapter.notifyDataSetChanged()
         updateUIForNormalMode()
     }
 
     private fun deleteSelectedImages() {
         CoroutineScope(Dispatchers.IO).launch {
+            val selectedImages = imageList.filter { it.isSelected }
             val imagePaths = selectedImages.map { it.imagePath }
             imageService.deleteImagesByPaths(imagePaths)
 
