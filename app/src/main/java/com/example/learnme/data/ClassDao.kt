@@ -22,8 +22,8 @@ interface ClassDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertClass(classEntity: ClassEntity): Long
 
-//    @Query("DELETE FROM classes WHERE classId = :classId")
-//    fun deleteClass(classId: Int)
+    @Query("DELETE FROM classes WHERE classId = :classId")
+    fun deleteClass(classId: Int)
 
     @Query("UPDATE classes SET class_name = :newName, isLabelGenerated = 1 WHERE classId = :classId")
     fun updateClassName(classId: Int, newName: String)
@@ -51,6 +51,10 @@ interface ImageDao {
     // Alternativa: agregar un método de borrado basado en el path o el ID
     @Query("DELETE FROM images WHERE image_path = :imagePath")
     fun deleteImageByPath(imagePath: String)
+
+    @Query("DELETE FROM images WHERE classId = :classId")
+    fun deleteImagesByClassId(classId: Int)
+
 
     @Query("SELECT COUNT(*) FROM images WHERE classId = :classId")
     fun getImageCountForClass(classId: Int): Int

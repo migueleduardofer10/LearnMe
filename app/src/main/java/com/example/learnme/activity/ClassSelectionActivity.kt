@@ -56,10 +56,9 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding.recyclerViewItems.adapter = adapter
     }
 
-    // Agregar nueva clase de forma asíncrona
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
-            val newClass = classService.addNewClass(itemList)
+            val newClass = classService.addNewClass()
 
             withContext(Dispatchers.Main) {
                 itemList.add(newClass)
@@ -67,6 +66,8 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             }
         }
     }
+
+
 
     override fun onCameraClicked(classId: Int) {
         val intent = Intent(this, DataCaptureActivity::class.java)
@@ -90,5 +91,21 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         val intent = Intent(this, AudioActivity::class.java)
         intent.putExtra("classId", classId)
         startActivity(intent)
+    }
+
+    override fun onDeleteClicked(classId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            classService.deleteImagesByClassId(classId)
+
+            classService.deleteClass(classId)
+
+            withContext(Dispatchers.Main) {
+                val removedIndex = itemList.indexOfFirst { it.classId == classId }
+                if (removedIndex != -1) {
+                    itemList.removeAt(removedIndex)
+                    adapter.notifyItemRemoved(removedIndex)
+                }
+            }
+        }
     }
 }
