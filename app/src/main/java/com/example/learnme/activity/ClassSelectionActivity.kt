@@ -2,6 +2,7 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
@@ -56,6 +57,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding.recyclerViewItems.adapter = adapter
     }
 
+
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
             val newClass = classService.addNewClass()
@@ -66,8 +68,6 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             }
         }
     }
-
-
 
     override fun onCameraClicked(classId: Int) {
         val intent = Intent(this, DataCaptureActivity::class.java)
@@ -89,6 +89,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onAudioClicked(classId: Int) {
         val intent = Intent(this, AudioActivity::class.java)
+        Log.d("AudioActivity", "Valor antes de pasar a  AudioActivity: $classId")
         intent.putExtra("classId", classId)
         startActivity(intent)
     }
