@@ -19,7 +19,7 @@ class ClassServiceTest {
     @Mock
     private lateinit var mockDatabase: AppDatabase
 
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock
     private lateinit var mockClassDao: ClassDao
 
     @Mock
