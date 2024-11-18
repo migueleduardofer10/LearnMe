@@ -3,11 +3,8 @@ package com.example.learnme.activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
 import android.view.View
 import androidx.activity.ComponentActivity
@@ -20,25 +17,24 @@ import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
 import com.example.learnme.helper.AudioHelper
 import com.example.learnme.helper.GPT4Helper
+import com.example.learnme.service.ClassService
+import com.example.learnme.service.ImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import java.io.ByteArrayOutputStream
-import java.io.File
 
 class CaptureResumeActivity : ComponentActivity() {
-
-    private val client = OkHttpClient()
 
     private lateinit var binding: ActivityCaptureResumeBinding
     private lateinit var adapter: ImageAdapter
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
-    private lateinit var database: AppDatabase
-    private lateinit var imageDao: ImageDao
+
+    private lateinit var classService: ClassService
+    private lateinit var imageService: ImageService
 
     private lateinit var audioHelper: AudioHelper
     private lateinit var gptHelper: GPT4Helper
@@ -50,13 +46,15 @@ class CaptureResumeActivity : ComponentActivity() {
         setContentView(binding.root)
 
         // Configurar la base de datos y el DAO
-        database = AppDatabase.getInstance(this)
-        imageDao = database.imageDao()
+        val database = AppDatabase.getInstance(this)
+        classService = ClassService(database)
+        imageService = ImageService(database)
+
 
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
 
-        gptHelper = GPT4Helper(client)
+        gptHelper = GPT4Helper(OkHttpClient())
         audioHelper = AudioHelper(
             context = this,
             contentResolver = contentResolver,
@@ -132,7 +130,7 @@ class CaptureResumeActivity : ComponentActivity() {
 
     private fun loadSavedAudio() {
         CoroutineScope(Dispatchers.IO).launch {
-            val audioPath = database.classDao().getClassById(classId)?.audioPath
+            val audioPath = classService.getEntityClass(classId).audioPath
             audioPath?.let {
                 audioHelper.setAudioUri(Uri.parse(it))
             }
@@ -144,15 +142,12 @@ class CaptureResumeActivity : ComponentActivity() {
         audioHelper.release()
     }
 
-
     private fun loadClassName() {
         CoroutineScope(Dispatchers.IO).launch {
-            val classEntity = database.classDao().getClassById(classId)
-
-            val className = classEntity?.className ?: "Clase desconocida"
+            val className = classService.getClassName(classId)
 
             withContext(Dispatchers.Main) {
-                binding.nameEditText.setText(className)
+                binding.nameEditText.text = className
             }
         }
     }
@@ -160,16 +155,13 @@ class CaptureResumeActivity : ComponentActivity() {
     // Cargar imágenes asociadas al classId desde la base de datos
     private fun loadImagesForClass(onImagesLoaded: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val images = imageDao.getImagesForClass(classId)
-            val tempImageList = images.map { ImageItem(it.imagePath) }
+            val tempImageList = imageService.getImagesForClass(classId)
 
             withContext(Dispatchers.Main) {
                 imageList.clear()
-                imageList.addAll(tempImageList.sortedBy {
-                    File(it.imagePath).nameWithoutExtension.toLongOrNull() ?: 0L
-                })
+                imageList.addAll(tempImageList)
                 adapter.notifyDataSetChanged()
-                onImagesLoaded()  // Llama a la función una vez que las imágenes se hayan cargado
+                onImagesLoaded()
             }
         }
     }
@@ -177,14 +169,12 @@ class CaptureResumeActivity : ComponentActivity() {
     // Genera una etiqueta automática para la clase usando la primera imagen si no tiene un nombre asignado
     private fun generateLabelIfNeeded() {
         CoroutineScope(Dispatchers.IO).launch {
-            val classEntity = database.classDao().getClassById(classId)
+            val classEntity = classService.getEntityClass(classId)
 
             // Verificar si ya se ha generado una etiqueta
-            if (classEntity != null && !classEntity.isLabelGenerated && imageList.isNotEmpty()) {
-                val firstImagePath = imageList.first().imagePath
-                val base64Image = encodeImageToBase64(firstImagePath)
-
-                gptHelper.sendImageToGPT4(base64Image) { response ->
+            if (!classEntity.isLabelGenerated && imageList.isNotEmpty()) {
+                val firstImage = gptHelper.encodeImageToBase64(imageList.first().imagePath)
+                gptHelper.sendImageToGPT4(firstImage) { response ->
                     // Actualizar el nombre de la clase y marcar isLabelGenerated como true
                     updateClassName(response)
                 }
@@ -195,22 +185,12 @@ class CaptureResumeActivity : ComponentActivity() {
     // Actualizar el nombre de la clase en la base de datos y la UI
     private fun updateClassName(newName: String) {
         val trimmedName = newName.trim().replace("\"", "")
-
         CoroutineScope(Dispatchers.Main).launch {
-            binding.nameEditText.setText(trimmedName)  // Actualiza el nombre en la UI
+            binding.nameEditText.text = trimmedName
         }
-
         CoroutineScope(Dispatchers.IO).launch {
-            database.classDao().updateClassName(classId, trimmedName)
+            classService.updateClassName(classId, trimmedName)
         }
-    }
-
-    // Codifica la imagen a Base64
-    private fun encodeImageToBase64(imagePath: String): String {
-        val bitmap = BitmapFactory.decodeFile(imagePath)
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
     }
 
     private fun toggleSelection(imageItem: ImageItem) {
@@ -236,10 +216,10 @@ class CaptureResumeActivity : ComponentActivity() {
     private fun deleteSelectedImages() {
         CoroutineScope(Dispatchers.IO).launch {
             val selectedImages = imageList.filter { it.isSelected }
-            selectedImages.forEach { imageItem ->
-                imageDao.deleteImageByPath(imageItem.imagePath)
-            }
+            val imagePaths = selectedImages.map { it.imagePath }
 
+            // Usar el servicio para eliminar las imágenes
+            imageService.deleteImagesByPaths(imagePaths)
             withContext(Dispatchers.Main) {
                 imageList.removeAll(selectedImages)
                 adapter.notifyDataSetChanged()

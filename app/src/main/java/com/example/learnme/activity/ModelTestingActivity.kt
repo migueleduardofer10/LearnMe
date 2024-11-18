@@ -12,14 +12,14 @@ import com.example.learnme.data.AppDatabase
 import com.example.learnme.databinding.ActivityModelTestingBinding
 import com.example.learnme.helper.CameraHelper
 import com.example.learnme.helper.CameraPermissionsManager
-import com.example.learnme.helper.TransferLearning
+import com.example.learnme.helper.TransferLearningHelper
 import com.example.learnme.helper.TransferLearningManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category
 import java.io.IOException
 
-class ModelTestingActivity : ComponentActivity(), TransferLearning.ClassifierListener {
+class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.ClassifierListener {
 
     private lateinit var binding: ActivityModelTestingBinding
     private lateinit var cameraHelper: CameraHelper
