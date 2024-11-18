@@ -1,5 +1,6 @@
 package com.example.learnme.activity
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
@@ -207,6 +208,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         TODO("Not yet implemented")
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onResults(results: List<Category>?, inferenceTime: Long) {
         runOnUiThread {
             results?.let { list ->

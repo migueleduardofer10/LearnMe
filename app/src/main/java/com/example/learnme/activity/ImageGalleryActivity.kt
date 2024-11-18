@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
-import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityImageGaleryBinding
