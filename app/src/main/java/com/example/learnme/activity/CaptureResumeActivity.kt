@@ -228,6 +228,10 @@ class CaptureResumeActivity : ComponentActivity() {
 
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(binding.nameEditText, InputMethodManager.SHOW_IMPLICIT)
+
+        binding.nameEditText.post {
+            binding.nameEditText.selectAll()
+        }
     }
 
     private fun saveClassName(newClassName: String) {
