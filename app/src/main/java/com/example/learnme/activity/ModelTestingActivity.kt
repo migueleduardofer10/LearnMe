@@ -236,7 +236,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         }
     }
     override fun onLossResults(lossNumber: Float) {
-        TODO("Not yet implemented")
+        Log.d("ModelTestingActivity", "Loss recibido: $lossNumber")
     }
 
 }
