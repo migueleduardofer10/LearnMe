@@ -53,4 +53,14 @@ class ClassService(private val database: AppDatabase) {
     fun deleteClass(classId: Int) {
         classDao.deleteClass(classId)
     }
+
+    fun getClassesWithoutImages(): List<ItemClass> {
+        val classes = classDao.getAllClasses()
+        return classes.filter { classEntity ->
+            imageDao.getImageCountForClass(classEntity.classId) == 0
+        }.map { classEntity ->
+            ItemClass(classEntity.className, classEntity.classId, 0)
+        }
+    }
+
 }

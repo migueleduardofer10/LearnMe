@@ -1,6 +1,7 @@
 package com.example.learnme.activity
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -46,14 +47,12 @@ class DataCaptureActivity : ComponentActivity() {
         binding = ActivityDataCaptureBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         // Configurar la base de datos y el DAO
         val database = AppDatabase.getInstance(this)
         imageService = ImageService(database)
 
-
         // Obtén el classId del Intent
-        classId = intent.getIntExtra("classId", -1)  // -1 es un valor por defecto
+        classId = intent.getIntExtra("classId", -1)
 
         val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
         adapter = GridConfig.setupGridWithAdapter(
@@ -65,8 +64,6 @@ class DataCaptureActivity : ComponentActivity() {
             onItemClick = { imageItem ->
                 if (isSelectionMode) {
                     toggleSelection(imageItem)
-                } else {
-                    // Lógica adicional para clics normales si es necesario
                 }
             }
         )
@@ -76,8 +73,6 @@ class DataCaptureActivity : ComponentActivity() {
 
         // Inicializar permisos de cámara
         val cameraPermissionsManager = CameraPermissionsManager(this) {
-            // Solo se ejecuta si el permiso es otorgado
-            // Inicializar CameraHelper con la vista de vista previa
             cameraHelper = CameraHelper(
                 this,
                 binding.previewView,
@@ -93,8 +88,12 @@ class DataCaptureActivity : ComponentActivity() {
         binding.cameraButton.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    isCapturing = true
-                    startContinuousCapture()
+                    if (!hasReachedMaxSamples()) {
+                        isCapturing = true
+                        startContinuousCapture()
+                    } else {
+                        showMaxSamplesReachedAlert()
+                    }
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -115,22 +114,36 @@ class DataCaptureActivity : ComponentActivity() {
         binding.hamburgerButton.setOnClickListener { enterSelectionMode() }
         binding.deleteButton.setOnClickListener { deleteSelectedImages() }
         binding.cancelButton.setOnClickListener { exitSelectionMode() }
-
     }
 
     private fun startContinuousCapture() {
         val captureRunnable = object : Runnable {
             override fun run() {
-                if (isCapturing) {
+                if (isCapturing && !hasReachedMaxSamples()) {
                     cameraHelper.takePhoto()
                     handler.postDelayed(this, 500)
+                } else if (hasReachedMaxSamples()) {
+                    isCapturing = false
+                    showMaxSamplesReachedAlert()
                 }
             }
         }
         handler.post(captureRunnable)
     }
 
-    // Cargar imágenes desde la base de datos
+    private fun hasReachedMaxSamples(): Boolean {
+        return imageList.size >= 5
+    }
+
+    private fun showMaxSamplesReachedAlert() {
+        AlertDialog.Builder(this)
+            .setTitle("Límite alcanzado")
+            .setMessage("Solo puedes capturar un máximo de 5 imágenes para esta clase.")
+            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+            .create()
+            .show()
+    }
+
     private fun loadCapturedImages() {
         CoroutineScope(Dispatchers.IO).launch {
             val tempImageList = imageService.getImagesForClass(classId)
@@ -143,19 +156,20 @@ class DataCaptureActivity : ComponentActivity() {
         }
     }
 
-    // Procesar y guardar ImageProxy en un archivo
     private fun processAndSaveImage(imageProxy: ImageProxy) {
-        val externalMediaDir = externalMediaDirs.first()
-        CoroutineScope(Dispatchers.IO).launch {
-            val imagePath = imageService.processAndSaveImage(imageProxy, classId, externalMediaDir)
+        if (!hasReachedMaxSamples()) {
+            val externalMediaDir = externalMediaDirs.first()
+            CoroutineScope(Dispatchers.IO).launch {
+                val imagePath =
+                    imageService.processAndSaveImage(imageProxy, classId, externalMediaDir)
 
-            withContext(Dispatchers.Main) {
-                imageList.add(ImageItem(imagePath))
-                adapter.notifyItemInserted(imageList.size - 1)
+                withContext(Dispatchers.Main) {
+                    imageList.add(ImageItem(imagePath))
+                    adapter.notifyItemInserted(imageList.size - 1)
+                }
             }
         }
     }
-
     private fun toggleSelection(imageItem: ImageItem) {
         if (selectedImages.contains(imageItem)) {
             selectedImages.remove(imageItem)
