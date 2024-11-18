@@ -1,4 +1,4 @@
-package com.example.learnme.fragment
+package com.example.learnme.helper
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,12 +12,12 @@ import java.io.File
 
 object TransferLearningManager {
     @SuppressLint("StaticFieldLeak")
-    private var transferLearningHelper: TransferLearning? = null
+    private var transferLearningHelper: TransferLearningHelper? = null
 
     // Inicializar el TransferLearning solo si no ha sido inicializado
-    suspend fun initialize(context: Context, classes: List<ClassEntity>, listener: TransferLearning.ClassifierListener) {
+    suspend fun initialize(context: Context, classes: List<ClassEntity>, listener: TransferLearningHelper.ClassifierListener) {
         if (transferLearningHelper == null) {
-            transferLearningHelper = TransferLearning(
+            transferLearningHelper = TransferLearningHelper(
                 context = context.applicationContext,  // Acceso seguro al contexto de la aplicación
                 classifierListener = listener,
                 classes = classes
@@ -26,11 +26,11 @@ object TransferLearningManager {
         }
     }
 
-    fun getTransferLearningHelper(): TransferLearning? {
+    fun getTransferLearningHelper(): TransferLearningHelper? {
         return transferLearningHelper
     }
 
-    fun updateClassifierListener(listener: TransferLearning.ClassifierListener) {
+    fun updateClassifierListener(listener: TransferLearningHelper.ClassifierListener) {
         transferLearningHelper?.updateListener(listener)
     }
 

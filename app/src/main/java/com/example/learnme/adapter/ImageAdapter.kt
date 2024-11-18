@@ -11,7 +11,6 @@ import com.example.learnme.R
 // Data class to represent each image item
 data class ImageItem(
     val imagePath: String, // Cambiado a String para manejar rutas de archivos
-    val classId: Int,  // Identificador para asociar la imagen con una clase específica
     var isSelected: Boolean = false // Indicador de selección para el modo de selección múltiple
 )
 
@@ -87,9 +86,4 @@ class ImageAdapter(
     // Devolver el tamaño de la lista
     override fun getItemCount(): Int = imageList.size
 
-    // Filtrar imágenes por classId
-    fun filterImagesByClass(classId: Int) {
-        imageList = imageList.filter { it.classId == classId }.toMutableList()
-        notifyDataSetChanged()
-    }
 }

@@ -1,11 +1,11 @@
-package com.example.learnme.fragment
+package com.example.learnme.service
 
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
 import com.example.learnme.adapter.ImageItem
 
-class GalleryHelper(private val context: Context) {
+class GalleryService(private val context: Context) {
 
     fun loadImagesFromGallery(): MutableList<ImageItem> {
         val imageList = mutableListOf<ImageItem>()
@@ -23,7 +23,7 @@ class GalleryHelper(private val context: Context) {
             val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             while (it.moveToNext()) {
                 val imagePath = it.getString(columnIndex)
-                imageList.add(ImageItem(imagePath,2))
+                imageList.add(ImageItem(imagePath))
             }
         }
         return imageList

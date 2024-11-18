@@ -8,8 +8,8 @@ import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.data.ClassEntity
 import com.example.learnme.databinding.ActivityTrainingLoadBinding
-import com.example.learnme.fragment.TransferLearning
-import com.example.learnme.fragment.TransferLearningManager
+import com.example.learnme.helper.TransferLearningHelper
+import com.example.learnme.helper.TransferLearningManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 import org.tensorflow.lite.support.label.Category
 import java.util.Locale
 
-class TrainingLoadActivity : ComponentActivity(), TransferLearning.ClassifierListener {
+class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.ClassifierListener {
 
     private lateinit var binding: ActivityTrainingLoadBinding
     private lateinit var database: AppDatabase

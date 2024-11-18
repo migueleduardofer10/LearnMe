@@ -1,7 +1,13 @@
-package com.example.learnme.fragment
+package com.example.learnme.helper
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.util.Log
 import com.example.learnme.config.GPTConfig
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonParseException
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -9,13 +15,22 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.json.JSONException
-import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 class GPT4Helper(
     private val client: OkHttpClient
 ) {
+    private val gson = Gson()
+
+    // Codifica la imagen a Base64
+    fun encodeImageToBase64(imagePath: String): String {
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.NO_WRAP)
+    }
+
     // Envía la imagen a la API de GPT-4 para obtener una etiqueta
     fun sendImageToGPT4(base64Image: String, callback: (String) -> Unit) {
         val url = GPTConfig.BASE_URL
@@ -52,14 +67,16 @@ class GPT4Helper(
                 val responseBody = response.body?.string()
                 if (responseBody != null) {
                     try {
-                        val jsonObject = JSONObject(responseBody)
-                        val choicesArray = jsonObject.getJSONArray("choices")
+                        val jsonResponse = gson.fromJson(responseBody, JsonObject::class.java)
+                        val choicesArray = jsonResponse.getAsJsonArray("choices")
                         val generatedLabel = choicesArray
-                            .getJSONObject(0)
-                            .getJSONObject("message")
-                            .getString("content")
+                            .get(0)
+                            .asJsonObject
+                            .getAsJsonObject("message")
+                            .get("content")
+                            .asString
                         callback(generatedLabel)
-                    } catch (e: JSONException) {
+                    } catch (e: JsonParseException) {
                         Log.e("Error", "Failed to parse JSON", e)
                     }
                 }

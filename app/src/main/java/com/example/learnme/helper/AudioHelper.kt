@@ -1,9 +1,8 @@
-package com.example.learnme.fragment
+package com.example.learnme.helper
 
 import android.content.ContentResolver
 import android.content.Context
 import android.media.MediaPlayer
-import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -11,11 +10,6 @@ import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import com.example.learnme.data.AppDatabase
-import com.example.learnme.databinding.ActivityCaptureResumeBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.IOException
 
 class AudioHelper(

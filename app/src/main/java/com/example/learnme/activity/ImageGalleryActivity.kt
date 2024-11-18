@@ -5,27 +5,28 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
-import com.example.learnme.data.ImageEntity
 import com.example.learnme.R
 import com.example.learnme.config.GridConfig
 import com.example.learnme.databinding.ActivityImageGaleryBinding
-import com.example.learnme.fragment.GalleryPermissionsManager
-import com.example.learnme.fragment.GalleryHelper
+import com.example.learnme.helper.GalleryPermissionsManager
+import com.example.learnme.service.GalleryService
 import com.example.learnme.adapter.ImageAdapter
 import com.example.learnme.adapter.ImageItem
+import com.example.learnme.service.ImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ImageGalleryActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityImageGaleryBinding
-    private lateinit var galleryHelper: GalleryHelper
+    private lateinit var galleryService: GalleryService
+    private lateinit var imageService: ImageService
     private lateinit var imageList: MutableList<ImageItem>
     private lateinit var adapter: ImageAdapter
     private var classId: Int = -1  // Valor por defecto en caso de que no se reciba
-    private lateinit var database: AppDatabase // Base de datos para almacenar las imágenes
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +37,12 @@ class ImageGalleryActivity : ComponentActivity() {
         // Obtén el classId del Intent
         classId = intent.getIntExtra("classId", -1)  // -1 es un valor por defecto
 
-        galleryHelper = GalleryHelper(this)
-        database = AppDatabase.getInstance(this) // Inicializa la base de datos
+        val database = AppDatabase.getInstance(this) // Inicializa la base de datos
+        galleryService = GalleryService(this)
+        imageService = ImageService(database)
 
         val permissionsManager = GalleryPermissionsManager(this) {
-            imageList = galleryHelper.loadImagesFromGallery()
+            imageList = galleryService.loadImagesFromGallery()
             val spacing = resources.getDimensionPixelSize(R.dimen.grid_spacing)
             adapter = GridConfig.setupGridWithAdapter(
                 recyclerView = binding.recyclerViewImages,
@@ -63,11 +65,7 @@ class ImageGalleryActivity : ComponentActivity() {
         }
 
         binding.checkButton.setOnClickListener {
-            saveSelectedImages()
-            Toast.makeText(this, "Imágenes seleccionadas guardadas", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, CaptureResumeActivity::class.java)
-            intent.putExtra("classId", classId)
-            startActivity(intent)
+            handleSaveSelectedImages()
         }
 
 
@@ -80,18 +78,16 @@ class ImageGalleryActivity : ComponentActivity() {
     }
 
     // Guardar imágenes seleccionadas en la base de datos
-    private fun saveSelectedImages() {
+    private fun handleSaveSelectedImages() {
         val selectedImages = imageList.filter { it.isSelected }
 
-        // Ejecutar la inserción en un hilo de fondo
         CoroutineScope(Dispatchers.IO).launch {
-            selectedImages.forEach { imageItem ->
-                val imageEntity = ImageEntity(
-                    imagePath = imageItem.imagePath,
-                    classId = classId,
-//                    rotation = 0
-                )
-                database.imageDao().insertImage(imageEntity)  // Inserta la imagen en la base de datos
+            imageService.saveImages(selectedImages, classId)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ImageGalleryActivity, "Imágenes seleccionadas guardadas", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@ImageGalleryActivity, CaptureResumeActivity::class.java)
+                intent.putExtra("classId", classId)
+                startActivity(intent)
             }
         }
     }
