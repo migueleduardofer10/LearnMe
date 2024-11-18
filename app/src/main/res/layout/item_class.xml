@@ -7,14 +7,34 @@
     android:padding="20dp"
     android:layout_marginBottom="10dp">
 
-    <TextView
-        android:id="@+id/classNameText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="Clase 1"
-        style="@style/Headline5"/>
+    <!-- Contenedor para el título y el botón de eliminar -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
+        <TextView
+            android:id="@+id/classNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="Clase 1"
+            style="@style/Headline5" />
+
+        <!-- Botón de eliminar en la esquina superior derecha -->
+        <ImageButton
+            android:id="@+id/deleteClassButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_remove_40px"
+            android:contentDescription="Eliminar clase"
+            android:tint="@android:color/holo_red_dark" />
+    </RelativeLayout>
+
+    <!-- Muestras de clase -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,9 +48,6 @@
             android:layout_marginEnd="20dp"
             android:text="Muestras: ¿?"
             style="@style/Paragraph"/>
-
-
-
     </LinearLayout>
 
     <LinearLayout

@@ -11,14 +11,19 @@ class ClassService(private val database: AppDatabase) {
     private val classDao: ClassDao = database.classDao()
     private val imageDao: ImageDao = database.imageDao()
 
-    // Agregar una nueva clase y devolver su representación
-    fun addNewClass(existingClasses: List<ItemClass>): ItemClass {
-        val newClass = ClassEntity(className = "Clase ${existingClasses.size + 1}")
+    fun addNewClass(): ItemClass {
+        val currentClassCount = getClassCount()
+        val newClassName = "Clase ${currentClassCount + 1}"
+
+        val newClass = ClassEntity(className = newClassName)
         val classId = classDao.insertClass(newClass).toInt()
 
-        return ItemClass("Clase $classId", classId, 0)
+        return ItemClass(newClassName, classId, 0)
     }
 
+    fun getClassCount(): Int {
+        return classDao.getAllClasses().size
+    }
     // Obtener todas las clases con el conteo de muestras asociado
     fun getAllClasses(): List<ItemClass> {
         val classes = classDao.getAllClasses()
@@ -40,5 +45,12 @@ class ClassService(private val database: AppDatabase) {
 
     fun updateClassName(classId: Int, newName: String) {
         database.classDao().updateClassName(classId, newName)
+    }
+
+    fun deleteImagesByClassId(classId: Int) {
+        imageDao.deleteImagesByClassId(classId)
+    }
+    fun deleteClass(classId: Int) {
+        classDao.deleteClass(classId)
     }
 }

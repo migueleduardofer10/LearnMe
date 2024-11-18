@@ -226,7 +226,6 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.nameEditText.isEnabled = true
         binding.nameEditText.requestFocus()
 
-        // Mostrar teclado al habilitar edición
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(binding.nameEditText, InputMethodManager.SHOW_IMPLICIT)
     }
