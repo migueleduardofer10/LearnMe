@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.adapter.ItemAdapter
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener{
+class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityClassSelectionBinding
     private lateinit var itemList: MutableList<ItemClass>
@@ -42,8 +43,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         }
 
         binding.nextButton.setOnClickListener {
-            val intent = Intent(this, Step2Activity::class.java)
-            startActivity(intent)
+            validateClassesBeforeProceeding()
         }
 
         binding.newClassButton.setOnClickListener {
@@ -57,7 +57,6 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding.recyclerViewItems.adapter = adapter
     }
 
-
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
             val newClass = classService.addNewClass()
@@ -67,6 +66,36 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
                 adapter.notifyItemInserted(itemList.size - 1)
             }
         }
+    }
+
+    private fun validateClassesBeforeProceeding() {
+        CoroutineScope(Dispatchers.IO).launch {
+            // Obtiene las clases que no tienen imágenes
+            val incompleteClasses = classService.getClassesWithoutImages()
+
+            withContext(Dispatchers.Main) {
+                if (incompleteClasses.isNotEmpty()) {
+                    showIncompleteClassesAlert(incompleteClasses)
+                } else {
+                    // Si todas las clases tienen al menos una foto, procede
+                    val intent = Intent(this@ClassSelectionActivity, Step2Activity::class.java)
+                    startActivity(intent)
+                }
+            }
+        }
+    }
+
+    private fun showIncompleteClassesAlert(incompleteClasses: List<ItemClass>) {
+        val classNames = incompleteClasses.joinToString("\n") { it.className }
+        val message = "Las siguientes clases no cuentan con una imagen:\n\n$classNames"
+
+        val alertDialog = android.app.AlertDialog.Builder(this)
+            .setTitle("Clases incompletas")
+            .setMessage(message)
+            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        alertDialog.show()
     }
 
     override fun onCameraClicked(classId: Int) {
