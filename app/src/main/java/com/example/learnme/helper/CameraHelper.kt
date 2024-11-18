@@ -66,6 +66,8 @@ class CameraHelper(
         }, ContextCompat.getMainExecutor(activity))
     }
 
+
+
     // Función para tomar una foto en formato ImageProxy
     fun takePhoto() {
         var captureMode = true
