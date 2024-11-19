@@ -139,7 +139,7 @@ class TransferLearningHelper (
 
     // Codifica las clases en un array de floats
     private fun encoding(id: Int): FloatArray {
-        val classEncoded = FloatArray(classes.size) { 0f }
+        val classEncoded = FloatArray(10) { 0f } //Antes era classes.size
         classEncoded[id] = 1f
         return classEncoded
     }
@@ -188,7 +188,7 @@ class TransferLearningHelper (
                             val trainingBatchLabels =
                                 MutableList(trainBatchSize) {
                                     FloatArray(
-                                        classes.size //Cantidad de clases
+                                        10 //Cantidad de clases
                                     )
                                 }
 
@@ -291,13 +291,13 @@ class TransferLearningHelper (
 
                 val outputs: MutableMap<String, Any> = HashMap()
                 val output = TensorBuffer.createFixedSize(
-                    intArrayOf(1, classes.size),
+                    intArrayOf(1, 10),
                     DataType.FLOAT32
                 )
                 outputs[INFERENCE_OUTPUT_KEY] = output.buffer
 
                 interpreter?.runSignature(inputs, outputs, INFERENCE_KEY)
-                val classIds = classes.map { it.classId.toString() }
+                val classIds = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
 
                 Log.d("TransferLearning", "Class IDs: $classIds")
 
