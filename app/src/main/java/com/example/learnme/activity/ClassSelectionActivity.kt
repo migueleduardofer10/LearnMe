@@ -63,11 +63,11 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (itemList.size >= 5) {
+            if (itemList.size >= 4) {
                 withContext(Dispatchers.Main) {
                     AlertDialog.Builder(this@ClassSelectionActivity)
                         .setTitle("Límite alcanzado")
-                        .setMessage("Solo puedes tener 5 clases, incluyendo 'Clase Desconocido'.")
+                        .setMessage("Solo puedes tener un máximo de 4 clases.")
                         .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
                         .create()
                         .show()
@@ -91,6 +91,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         }
     }
 
+
     private fun refreshClasses() {
         CoroutineScope(Dispatchers.IO).launch {
             val classes = classService.getAllClasses()
@@ -103,11 +104,11 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
     }
     private fun validateClassCountBeforeProceeding() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (itemList.size != 5) {
+            if (itemList.size != 4) {
                 withContext(Dispatchers.Main) {
                     AlertDialog.Builder(this@ClassSelectionActivity)
                         .setTitle("Clases incompletas")
-                        .setMessage("Debes tener exactamente 5 clases, incluyendo 'Clase Desconocido', para continuar.")
+                        .setMessage("Debes tener exactamente 4 clases para continuar.")
                         .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
                         .create()
                         .show()
@@ -126,6 +127,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             }
         }
     }
+
 
     private fun showIncompleteClassesAlert(incompleteClasses: List<ItemClass>) {
         val classNames = incompleteClasses.joinToString("\n") { it.className }
@@ -167,30 +169,17 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onDeleteClicked(classId: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            val className = classService.getClassName(classId)
+            CoroutineScope(Dispatchers.IO).launch {
+                classService.deleteImagesByClassId(classId)
+                classService.deleteClass(classId)
 
-            withContext(Dispatchers.Main) {
-                if (className == "Clase Desconocido") {
-                    AlertDialog.Builder(this@ClassSelectionActivity)
-                        .setTitle("Acción no permitida")
-                        .setMessage("No puedes eliminar la clase 'Clase Desconocido'.")
-                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
-                        .create()
-                        .show()
-                    return@withContext
-                }
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    classService.deleteImagesByClassId(classId)
-                    classService.deleteClass(classId)
-
-                    withContext(Dispatchers.Main) {
-                        refreshClasses()
-                    }
+                withContext(Dispatchers.Main) {
+                    refreshClasses()
                 }
             }
         }
     }
+
 
 
 }

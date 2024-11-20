@@ -14,16 +14,13 @@ class ClassService(private val database: AppDatabase) {
     fun initializeDefaultClasses() {
         val existingClasses = classDao.getAllClasses()
         if (existingClasses.isEmpty()) {
-            // Lista de nombres de clases por defecto
             val defaultClasses = listOf(
                 "Clase 1",
                 "Clase 2",
                 "Clase 3",
-                "Clase 4",
-                "Clase Desconocido"
+                "Clase 4"
             )
 
-            // Insertar las clases por defecto en la base de datos
             defaultClasses.forEach { className ->
                 val newClass = ClassEntity(className = className)
                 classDao.insertClass(newClass)
@@ -32,14 +29,15 @@ class ClassService(private val database: AppDatabase) {
     }
 
 
+
     fun addNewClass(): ItemClass {
         val currentClassCount = getClassCount()
 
-        if (currentClassCount >= 5) {
-            throw IllegalStateException("No se pueden agregar más de 5 clases.")
+        if (currentClassCount >= 4) {
+            throw IllegalStateException("No se pueden agregar más de 4 clases.")
         }
 
-        val newClassName = "Clase ${currentClassCount}"
+        val newClassName = "Clase ${currentClassCount + 1}"
         val newClass = ClassEntity(className = newClassName)
 
         val classId = classDao.insertClass(newClass).toInt()
@@ -47,16 +45,14 @@ class ClassService(private val database: AppDatabase) {
         return ItemClass(newClassName, classId, 0)
     }
 
+
     fun getClassCount(): Int {
         return classDao.getAllClasses().size
     }
-    // Obtener todas las clases con el conteo de muestras asociado
+
     fun getAllClasses(): List<ItemClass> {
         val classes = classDao.getAllClasses()
-        val sortedClasses = classes.sortedBy { classEntity ->
-            if (classEntity.className == "Clase Desconocido") Int.MAX_VALUE else classEntity.classId
-        }
-        return sortedClasses.map { classEntity ->
+        return classes.sortedBy { it.classId }.map { classEntity ->
             val sampleCount = imageDao.getImageCountForClass(classEntity.classId)
             ItemClass(classEntity.className, classEntity.classId, sampleCount)
         }
@@ -64,7 +60,7 @@ class ClassService(private val database: AppDatabase) {
 
     fun getClassName(classId: Int): String {
         val classEntity = database.classDao().getClassById(classId)
-        return classEntity?.className ?: "Clase desconocida"
+        return classEntity?.className ?: "Clase no encontrada"
     }
 
     fun getEntityClass(classId: Int): ClassEntity {
