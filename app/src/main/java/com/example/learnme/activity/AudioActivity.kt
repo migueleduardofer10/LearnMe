@@ -42,7 +42,9 @@ class AudioActivity : ComponentActivity() {
             contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             audioUri = it
             saveAudioUriToDatabase()
-        }
+
+            val fileName = getFileNameFromUri(uri)
+            binding.audioStatus.text = fileName        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,7 +126,7 @@ class AudioActivity : ComponentActivity() {
 
                 withContext(Dispatchers.Main) {
                     audioHelper.setAudioUri(uri)
-                    binding.audioStatus.text = "Audio cargado y listo para reproducir"
+                    binding.audioStatus.text = getFileNameFromUri(uri)
                     binding.playPauseButton.isEnabled = true
                 }
             }
@@ -140,7 +142,7 @@ class AudioActivity : ComponentActivity() {
                 audioUri = Uri.parse(it)
                 withContext(Dispatchers.Main) {
                     audioHelper.setAudioUri(audioUri!!)
-                    binding.audioStatus.text = "Audio cargado y listo para reproducir"
+                    binding.audioStatus.text = getFileNameFromPath(it)
                     binding.playPauseButton.isEnabled = true
                 }
             } ?: withContext(Dispatchers.Main) {
@@ -149,7 +151,6 @@ class AudioActivity : ComponentActivity() {
             }
         }
     }
-
     private fun startRecording() {
         mediaRecorder = MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -187,8 +188,16 @@ class AudioActivity : ComponentActivity() {
         )
 
         saveAudioUriToDatabase()
+        binding.audioStatus.text = getFileNameFromPath(audioFilePath)
     }
 
+    private fun getFileNameFromPath(path: String): String {
+        return "Archivo: ${path.substringAfterLast("/")}"
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String {
+        return "Archivo: ${uri.lastPathSegment?.substringAfterLast("/")}"
+    }
     private fun checkPermissions(): Boolean {
         val recordPermission = android.Manifest.permission.RECORD_AUDIO
         val hasRecordPermission = ContextCompat.checkSelfPermission(this, recordPermission) == PackageManager.PERMISSION_GRANTED

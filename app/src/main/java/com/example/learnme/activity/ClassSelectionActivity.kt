@@ -92,6 +92,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
     }
 
 
+
     private fun refreshClasses() {
         CoroutineScope(Dispatchers.IO).launch {
             val classes = classService.getAllClasses()
