@@ -217,7 +217,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                     val label = highestScoreCategory.label
                     Log.d("InferenceResult", "Categoría: $label, Puntaje: $confidenceScore, Tiempo de inferencia: $inferenceTime ms")
 
-                    if (audioUrisLoaded && confidenceScore >= 0.8) {
+                    if (audioUrisLoaded && confidenceScore == 1.0f) {
                         val classId = label.toIntOrNull() ?: -1
                         if (classId != -1) {
                             val className = classIdToNameMap[classId]
@@ -230,11 +230,15 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                                 Log.e("ModelTestingActivity", "No se encontró un nombre para la clase con ID: $classId")
                             }
                         }
+                    } else {
+                        binding.nameClass.text = "Clase desconocida"
+                        binding.precisionText.text = "Precisión: ¿?"
                     }
                 }
             }
         }
     }
+
     override fun onLossResults(lossNumber: Float) {
         Log.d("ModelTestingActivity", "Loss recibido: $lossNumber")
     }

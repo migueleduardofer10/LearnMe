@@ -101,7 +101,7 @@ class AudioActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val className = database.classDao().getClassById(classId)?.className
             withContext(Dispatchers.Main) {
-                binding.nameTextView.text = className ?: "Clase desconocida"
+                binding.nameTextView.text = className ?: "Clase no encontrada"
             }
         }
     }
