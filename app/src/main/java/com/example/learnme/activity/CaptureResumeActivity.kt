@@ -1,6 +1,7 @@
 package com.example.learnme.activity
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -236,10 +237,20 @@ class CaptureResumeActivity : ComponentActivity() {
 
     private fun saveClassName(newClassName: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            classService.updateClassName(classId, newClassName)
-
-            withContext(Dispatchers.Main) {
-                binding.nameEditText.isEnabled = false
+            try {
+                classService.updateClassName(classId, newClassName)
+                withContext(Dispatchers.Main) {
+                    binding.nameEditText.isEnabled = false
+                }
+            } catch (e: IllegalStateException) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@CaptureResumeActivity)
+                        .setTitle("Error")
+                        .setMessage(e.message)
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
             }
         }
     }
