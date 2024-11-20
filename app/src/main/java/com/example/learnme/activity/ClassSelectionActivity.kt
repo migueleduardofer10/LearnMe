@@ -54,6 +54,10 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshClasses()
+    }
     private fun setupRecyclerView() {
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
         adapter = ItemAdapter(itemList, this)
