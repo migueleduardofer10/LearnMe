@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +25,6 @@ import java.io.IOException
 class AudioActivity : ComponentActivity() {
 
     private lateinit var audioHelper: AudioHelper
-
     private lateinit var binding: ActivityAudioBinding
     private var audioUri: Uri? = null
     private var classId: Int = -1
@@ -38,11 +38,13 @@ class AudioActivity : ComponentActivity() {
 
     private val audioPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
+            stopAudioIfPlayingAndResetProgress()
             contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             audioUri = it
             saveAudioUriToDatabase()
-            binding.audioStatus.text = "Audio cargado: ${it.lastPathSegment}"
-        }
+
+            val fileName = getFileNameFromUri(uri)
+            binding.audioStatus.text = fileName        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +54,8 @@ class AudioActivity : ComponentActivity() {
 
         classId = intent.getIntExtra("classId", -1)
 
+        Log.d("AudioActivity", "Valor recibido de classId: $classId")
+
         audioHelper = AudioHelper(
             context = this,
             contentResolver = contentResolver,
@@ -60,6 +64,8 @@ class AudioActivity : ComponentActivity() {
             seekBar = binding.seekBar
         )
 
+        loadClassName()
+
         binding.previousButton.setOnClickListener {
             val intent = Intent(this, ClassSelectionActivity::class.java)
             startActivity(intent)
@@ -67,6 +73,7 @@ class AudioActivity : ComponentActivity() {
         }
 
         binding.uploadAudioButton.setOnClickListener {
+            stopAudioIfPlayingAndResetProgress()
             audioPickerLauncher.launch(arrayOf("audio/*"))
         }
 
@@ -75,13 +82,10 @@ class AudioActivity : ComponentActivity() {
                 stopRecording()
             } else {
                 if (checkPermissions()) {
+                    stopAudioIfPlayingAndResetProgress()
                     startRecording()
                 }
             }
-        }
-
-        binding.previousButton.setOnClickListener {
-            finish()
         }
 
         binding.playPauseButton.setOnClickListener {
@@ -95,12 +99,39 @@ class AudioActivity : ComponentActivity() {
         loadSavedAudio()
     }
 
+    private fun loadClassName() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val className = database.classDao().getClassById(classId)?.className
+            withContext(Dispatchers.Main) {
+                binding.nameTextView.text = className ?: "Clase no encontrada"
+            }
+        }
+    }
+
+    private fun stopAudioIfPlayingAndResetProgress() {
+        if (audioHelper.isPlaying) {
+            audioHelper.pauseAudio()
+            binding.seekBar.progress = 0
+            audioHelper.release()
+        } else {
+            binding.seekBar.progress = 0
+        }
+    }
+
     private fun saveAudioUriToDatabase() {
         audioUri?.let { uri ->
             val audioPath = uri.toString()
             CoroutineScope(Dispatchers.IO).launch {
                 database.classDao().updateAudioPath(classId, audioPath)
+
+                withContext(Dispatchers.Main) {
+                    audioHelper.setAudioUri(uri)
+                    binding.audioStatus.text = getFileNameFromUri(uri)
+                    binding.playPauseButton.isEnabled = true
+                }
             }
+        } ?: run {
+            Log.e("AudioActivity", "Error: audioUri es null, no se puede guardar en la base de datos.")
         }
     }
 
@@ -111,11 +142,15 @@ class AudioActivity : ComponentActivity() {
                 audioUri = Uri.parse(it)
                 withContext(Dispatchers.Main) {
                     audioHelper.setAudioUri(audioUri!!)
+                    binding.audioStatus.text = getFileNameFromPath(it)
+                    binding.playPauseButton.isEnabled = true
                 }
+            } ?: withContext(Dispatchers.Main) {
+                binding.audioStatus.text = "No se ha cargado ningún archivo de audio"
+                binding.playPauseButton.isEnabled = false
             }
         }
     }
-
     private fun startRecording() {
         mediaRecorder = MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -145,7 +180,6 @@ class AudioActivity : ComponentActivity() {
         binding.recordAudioButton.text = "Grabar Audio"
         Toast.makeText(this, "Grabación guardada", Toast.LENGTH_SHORT).show()
 
-        // Usar FileProvider para obtener el URI correcto
         val audioFile = File(audioFilePath)
         audioUri = FileProvider.getUriForFile(
             this,
@@ -154,9 +188,16 @@ class AudioActivity : ComponentActivity() {
         )
 
         saveAudioUriToDatabase()
-        binding.audioStatus.text = "Audio grabado y guardado"
+        binding.audioStatus.text = getFileNameFromPath(audioFilePath)
     }
 
+    private fun getFileNameFromPath(path: String): String {
+        return "Archivo: ${path.substringAfterLast("/")}"
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String {
+        return "Archivo: ${uri.lastPathSegment?.substringAfterLast("/")}"
+    }
     private fun checkPermissions(): Boolean {
         val recordPermission = android.Manifest.permission.RECORD_AUDIO
         val hasRecordPermission = ContextCompat.checkSelfPermission(this, recordPermission) == PackageManager.PERMISSION_GRANTED

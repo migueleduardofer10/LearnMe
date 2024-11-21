@@ -217,7 +217,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                     val label = highestScoreCategory.label
                     Log.d("InferenceResult", "Categoría: $label, Puntaje: $confidenceScore, Tiempo de inferencia: $inferenceTime ms")
 
-                    if (audioUrisLoaded && confidenceScore >= 0.999) {
+                    if (audioUrisLoaded && confidenceScore == 1.0f) {
                         val classId = label.toIntOrNull() ?: -1
                         if (classId != -1) {
                             val className = classIdToNameMap[classId]
@@ -238,8 +238,9 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
             }
         }
     }
+
     override fun onLossResults(lossNumber: Float) {
-        TODO("Not yet implemented")
+        Log.d("ModelTestingActivity", "Loss recibido: $lossNumber")
     }
 
 }

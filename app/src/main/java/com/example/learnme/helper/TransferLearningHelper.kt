@@ -38,12 +38,17 @@ class TransferLearningHelper (
 
     //This lock guarantees that only one thread is performing training and
     //inference at any point in time.
+
+    private val classIdToIndex: Map<Int, Int>
+
     private val lock = Any()
     private var targetWidth: Int = 0
     private var targetHeight: Int = 0
     private val handler = Handler(Looper.getMainLooper())
 
     init {
+        classIdToIndex = classes.mapIndexed { index, classEntity -> classEntity.classId to index }.toMap()
+
         if (setupModelPersonalization()) {
             targetWidth = interpreter!!.getInputTensor(0).shape()[2]
             targetHeight = interpreter!!.getInputTensor(0).shape()[1]
@@ -94,7 +99,7 @@ class TransferLearningHelper (
                 trainingSamples.add(
                     TrainingSample(
                         bottleneck,
-                        encoding(classId-1) //Corregir, se relaciona con las clases predefinidas. Podemos pasar directamente el valor INT de la clase
+                        encoding(classId) // Usar el mapeo seguro
                     )
                 )
             }
@@ -138,9 +143,14 @@ class TransferLearningHelper (
     }
 
     // Codifica las clases en un array de floats
-    private fun encoding(id: Int): FloatArray {
-        val classEncoded = FloatArray(10) { 0f } //Antes era classes.size
-        classEncoded[id] = 1f
+    private fun encoding(classId: Int): FloatArray {
+        val classEncoded = FloatArray(classes.size) { 0f }
+        val index = classIdToIndex[classId]
+        if (index != null) {
+            classEncoded[index] = 1f
+        } else {
+            throw IllegalArgumentException("classId $classId no está mapeado a un índice válido")
+        }
         return classEncoded
     }
 
@@ -188,7 +198,7 @@ class TransferLearningHelper (
                             val trainingBatchLabels =
                                 MutableList(trainBatchSize) {
                                     FloatArray(
-                                        10 //Cantidad de clases
+                                        classes.size //Cantidad de clases
                                     )
                                 }
 
@@ -291,13 +301,13 @@ class TransferLearningHelper (
 
                 val outputs: MutableMap<String, Any> = HashMap()
                 val output = TensorBuffer.createFixedSize(
-                    intArrayOf(1, 10),
+                    intArrayOf(1, classes.size),
                     DataType.FLOAT32
                 )
                 outputs[INFERENCE_OUTPUT_KEY] = output.buffer
 
                 interpreter?.runSignature(inputs, outputs, INFERENCE_KEY)
-                val classIds = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+                val classIds = classes.map { it.classId.toString() }
 
                 Log.d("TransferLearning", "Class IDs: $classIds")
 

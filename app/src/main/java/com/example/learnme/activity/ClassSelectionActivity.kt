@@ -2,7 +2,10 @@ package com.example.learnme.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import android.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.adapter.ItemAdapter
@@ -15,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener{
+class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityClassSelectionBinding
     private lateinit var itemList: MutableList<ItemClass>
@@ -31,18 +34,19 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         binding = ActivityClassSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Cargar lista de clases en un hilo en segundo plano
+        // Inicializar clases por defecto y cargar lista de clases
         CoroutineScope(Dispatchers.IO).launch {
+            classService.initializeDefaultClasses() // Esto se ejecuta en un hilo secundario
+
+            // Obtener la lista de clases después de inicializar
             val classes = classService.getAllClasses()
             withContext(Dispatchers.Main) {
                 itemList = classes.toMutableList()
-                setupRecyclerView()
+                setupRecyclerView() // Configurar RecyclerView en el hilo principal
             }
         }
-
         binding.nextButton.setOnClickListener {
-            val intent = Intent(this, Step2Activity::class.java)
-            startActivity(intent)
+            validateClassCountBeforeProceeding()
         }
 
         binding.newClassButton.setOnClickListener {
@@ -50,22 +54,97 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        refreshClasses()
+    }
     private fun setupRecyclerView() {
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
         adapter = ItemAdapter(itemList, this)
         binding.recyclerViewItems.adapter = adapter
+        refreshClasses()
     }
 
-    // Agregar nueva clase de forma asíncrona
     private fun handleAddNewClass() {
         CoroutineScope(Dispatchers.IO).launch {
-            val newClass = classService.addNewClass(itemList)
+            if (itemList.size >= 4) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Límite alcanzado")
+                        .setMessage("Solo puedes tener un máximo de 4 clases.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+                return@launch
+            }
 
-            withContext(Dispatchers.Main) {
-                itemList.add(newClass)
-                adapter.notifyItemInserted(itemList.size - 1)
+            try {
+                val newClass = classService.addNewClass()
+                refreshClasses()
+            } catch (e: IllegalStateException) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Error")
+                        .setMessage(e.message)
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
             }
         }
+    }
+
+
+
+    private fun refreshClasses() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val classes = classService.getAllClasses()
+            withContext(Dispatchers.Main) {
+                itemList.clear()
+                itemList.addAll(classes)
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+    private fun validateClassCountBeforeProceeding() {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (itemList.size != 4) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Clases incompletas")
+                        .setMessage("Debes tener exactamente 4 clases para continuar.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+                return@launch
+            }
+
+            val incompleteClasses = classService.getClassesWithoutImages()
+            withContext(Dispatchers.Main) {
+                if (incompleteClasses.isNotEmpty()) {
+                    showIncompleteClassesAlert(incompleteClasses)
+                } else {
+                    val intent = Intent(this@ClassSelectionActivity, Step2Activity::class.java)
+                    startActivity(intent)
+                }
+            }
+        }
+    }
+
+
+    private fun showIncompleteClassesAlert(incompleteClasses: List<ItemClass>) {
+        val classNames = incompleteClasses.joinToString("\n") { it.className }
+        val message = "Las siguientes clases no cuentan con una imagen:\n\n$classNames"
+
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("Clases incompletas")
+            .setMessage(message)
+            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        alertDialog.show()
     }
 
     override fun onCameraClicked(classId: Int) {
@@ -88,7 +167,24 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
 
     override fun onAudioClicked(classId: Int) {
         val intent = Intent(this, AudioActivity::class.java)
+        Log.d("AudioActivity", "Valor antes de pasar a  AudioActivity: $classId")
         intent.putExtra("classId", classId)
         startActivity(intent)
     }
+
+    override fun onDeleteClicked(classId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.IO).launch {
+                classService.deleteImagesByClassId(classId)
+                classService.deleteClass(classId)
+
+                withContext(Dispatchers.Main) {
+                    refreshClasses()
+                }
+            }
+        }
+    }
+
+
+
 }
