@@ -24,6 +24,7 @@ class ItemAdapter(
         fun onUploadClicked(classId: Int)
         fun onEditClicked(classId: Int)
         fun onAudioClicked(classId: Int)
+        fun onDeleteClicked(classId: Int)
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -33,6 +34,7 @@ class ItemAdapter(
         val uploadButton: ImageButton = itemView.findViewById(R.id.uploadButton)
         val editButton: ImageButton = itemView.findViewById(R.id.editButton)
         val audioButton: ImageButton = itemView.findViewById(R.id.audioButton)
+        val deleteButton: ImageButton = itemView.findViewById(R.id.deleteClassButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -60,6 +62,9 @@ class ItemAdapter(
         }
         holder.audioButton.setOnClickListener {
             itemClickListener.onAudioClicked(currentItem.classId)
+        }
+        holder.deleteButton.setOnClickListener {
+            itemClickListener.onDeleteClicked(currentItem.classId)
         }
     }
 

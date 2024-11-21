@@ -1,10 +1,14 @@
 package com.example.learnme.activity
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.R
@@ -29,6 +33,7 @@ class CaptureResumeActivity : ComponentActivity() {
     private var classId: Int = -1
     private var imageList: MutableList<ImageItem> = mutableListOf()
     private var isSelectionMode = false
+    private var isAutoLabeling = false
 
     private lateinit var classService: ClassService
     private lateinit var imageService: ImageService
@@ -36,6 +41,7 @@ class CaptureResumeActivity : ComponentActivity() {
     private lateinit var audioHelper: AudioHelper
     private lateinit var gptHelper: GPT4Helper
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,7 +52,6 @@ class CaptureResumeActivity : ComponentActivity() {
         val database = AppDatabase.getInstance(this)
         classService = ClassService(database)
         imageService = ImageService(database)
-
 
         // Obtener el nombre de la clase desde el Intent
         classId = intent.getIntExtra("classId", -1)
@@ -74,53 +79,139 @@ class CaptureResumeActivity : ComponentActivity() {
             imageList = imageList,
             onItemClick = { imageItem ->
                 toggleSelection(imageItem)
+                clearEditTextFocus() // Limpiar el foco al interactuar con el RecyclerView
             }
         )
+
+        // Añadir un OnTouchListener al RecyclerView para quitar el foco del EditText
+        binding.recyclerViewImages.setOnTouchListener { _, _ ->
+            clearEditTextFocus()
+            false // Devolvemos false para que el evento de toque sea manejado por el RecyclerView también
+        }
 
         // Cargar imágenes desde la base de datos
         loadImagesForClass { generateLabelIfNeeded() }
 
-        binding.cameraButton.setOnClickListener {
-            val intent = Intent(this, DataCaptureActivity::class.java)
-            intent.putExtra("classId", classId)
-            startActivity(intent)
+        // Añadir listeners a los botones para limpiar el foco del EditText cuando se haga clic en ellos
+        setupButtonClickListeners()
+    }
+
+    private fun setupButtonClickListeners() {
+        binding.nameEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                val newClassName = binding.nameEditText.text.toString().trim()
+                if (newClassName.isNotEmpty()) {
+                    saveClassName(newClassName)
+                }
+
+                // Ocultar el teclado
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(binding.nameEditText.windowToken, 0)
+
+                // Limpiar el foco del EditText
+                binding.nameEditText.clearFocus()
+                true // Indicar que se ha manejado el evento
+            } else {
+                false // Devolver false para permitir otras acciones predeterminadas
+            }
         }
 
-        binding.uploadButton.setOnClickListener {
-            val intent = Intent(this, ImageGalleryActivity::class.java)
-            intent.putExtra("classId", classId)
-            startActivity(intent)
+        // Crear un método de orden superior para reducir la duplicación
+        val clearFocusAndExecute: (View.OnClickListener) -> View.OnClickListener = { action ->
+            View.OnClickListener {
+                clearEditTextFocus()
+                action.onClick(it)
+            }
         }
 
-        // Botón para activar el modo de selección
-        binding.hamburgerButton.setOnClickListener {
-            enterSelectionMode()
-        }
+        binding.cameraButton.setOnClickListener(
+            clearFocusAndExecute {
+                val intent = Intent(this, DataCaptureActivity::class.java)
+                intent.putExtra("classId", classId)
+                startActivity(intent)
+            }
+        )
 
-        // Botón para eliminar imágenes seleccionadas
-        binding.deleteButton.setOnClickListener {
-            deleteSelectedImages()
-        }
+        binding.uploadButton.setOnClickListener(
+            clearFocusAndExecute {
+                val intent = Intent(this, ImageGalleryActivity::class.java)
+                intent.putExtra("classId", classId)
+                startActivity(intent)
+            }
+        )
 
-        // Botón para cancelar el modo de selección
-        binding.cancelButton.setOnClickListener {
-            exitSelectionMode()
-        }
+        binding.backButton.setOnClickListener(
+            clearFocusAndExecute {
+                val intent = Intent(this, ClassSelectionActivity::class.java)
+                intent.putExtra("classId", classId)
+                startActivity(intent)
+            }
+        )
 
-        // Botón para regresar a la actividad anterior
-        binding.backButton.setOnClickListener {
-            val intent = Intent(this, ClassSelectionActivity::class.java)
-            intent.putExtra("classId", classId)
-            startActivity(intent)
-        }
+        binding.hamburgerButton.setOnClickListener(
+            clearFocusAndExecute {
+                enterSelectionMode()
+            }
+        )
 
-        binding.playAudioButton.setOnClickListener {
-            binding.playAudioButton.setOnClickListener {
+        binding.deleteButton.setOnClickListener(
+            clearFocusAndExecute {
+                deleteSelectedImages()
+            }
+        )
+
+        binding.cancelButton.setOnClickListener(
+            clearFocusAndExecute {
+                exitSelectionMode()
+            }
+        )
+
+        binding.playAudioButton.setOnClickListener(
+            clearFocusAndExecute {
                 if (audioHelper.isPlaying) {
                     audioHelper.pauseAudio()
                 } else {
                     audioHelper.playAudio()
                 }
+            }
+        )
+
+        // Botón para habilitar la edición del nombre de la clase
+        binding.editButton.setOnClickListener {
+            if (!isAutoLabeling) {
+                enableClassNameEditing()
+            }
+        }
+
+        // Listener para saber cuándo el EditText pierde el foco
+        binding.nameEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val newClassName = binding.nameEditText.text.toString().trim()
+                if (newClassName.isNotEmpty()) {
+                    saveClassName(newClassName)
+                }
+            }
+        }
+
+        // Listener global para toda la vista raíz (cualquier clic fuera del EditText)
+        binding.root.setOnClickListener {
+            clearEditTextFocus()
+        }
+    }
+
+    // Método para limpiar el foco del EditText y guardar el nombre de la clase
+    private fun clearEditTextFocus() {
+        if (binding.nameEditText.hasFocus()) {
+            binding.nameEditText.clearFocus()
+
+            // Ocultar el teclado
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(binding.nameEditText.windowToken, 0)
+
+            // Guardar el nombre si no está vacío
+            val newClassName = binding.nameEditText.text.toString().trim()
+            if (newClassName.isNotEmpty()) {
+                saveClassName(newClassName)
             }
         }
     }
@@ -134,22 +225,51 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        audioHelper.release()
-    }
-
     private fun loadClassName() {
         CoroutineScope(Dispatchers.IO).launch {
             val className = classService.getClassName(classId)
 
             withContext(Dispatchers.Main) {
-                binding.nameEditText.text = className
+                binding.nameEditText.setText(className)
+                binding.nameEditText.isEnabled = false // Deshabilitar edición inicialmente
             }
         }
     }
 
-    // Cargar imágenes asociadas al classId desde la base de datos
+    private fun enableClassNameEditing() {
+        if (isAutoLabeling) return
+
+        binding.nameEditText.isEnabled = true
+        binding.nameEditText.requestFocus()
+
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(binding.nameEditText, InputMethodManager.SHOW_IMPLICIT)
+
+        binding.nameEditText.post {
+            binding.nameEditText.selectAll()
+        }
+    }
+
+    private fun saveClassName(newClassName: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                classService.updateClassName(classId, newClassName)
+                withContext(Dispatchers.Main) {
+                    binding.nameEditText.isEnabled = false
+                }
+            } catch (e: IllegalStateException) {
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@CaptureResumeActivity)
+                        .setTitle("Error")
+                        .setMessage(e.message)
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+            }
+        }
+    }
+
     private fun loadImagesForClass(onImagesLoaded: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val tempImageList = imageService.getImagesForClass(classId)
@@ -163,27 +283,27 @@ class CaptureResumeActivity : ComponentActivity() {
         }
     }
 
-    // Genera una etiqueta automática para la clase usando la primera imagen si no tiene un nombre asignado
     private fun generateLabelIfNeeded() {
         CoroutineScope(Dispatchers.IO).launch {
             val classEntity = classService.getEntityClass(classId)
 
-            // Verificar si ya se ha generado una etiqueta
             if (!classEntity.isLabelGenerated && imageList.isNotEmpty()) {
+                isAutoLabeling = true // Activar bandera de etiquetado automático
+
                 val firstImage = gptHelper.encodeImageToBase64(imageList.first().imagePath)
                 gptHelper.sendImageToGPT4(firstImage) { response ->
-                    // Actualizar el nombre de la clase y marcar isLabelGenerated como true
                     updateClassName(response)
+                    isAutoLabeling = false // Desactivar bandera al finalizar
                 }
             }
         }
     }
 
-    // Actualizar el nombre de la clase en la base de datos y la UI
     private fun updateClassName(newName: String) {
         val trimmedName = newName.trim().replace("\"", "")
         CoroutineScope(Dispatchers.Main).launch {
-            binding.nameEditText.text = trimmedName
+            binding.nameEditText.setText(trimmedName)
+            binding.nameEditText.isEnabled = false
         }
         CoroutineScope(Dispatchers.IO).launch {
             classService.updateClassName(classId, trimmedName)
@@ -215,7 +335,6 @@ class CaptureResumeActivity : ComponentActivity() {
             val selectedImages = imageList.filter { it.isSelected }
             val imagePaths = selectedImages.map { it.imagePath }
 
-            // Usar el servicio para eliminar las imágenes
             imageService.deleteImagesByPaths(imagePaths)
             withContext(Dispatchers.Main) {
                 imageList.removeAll(selectedImages)
@@ -239,5 +358,16 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.hamburgerButton.visibility = View.VISIBLE
         binding.deleteButton.visibility = View.GONE
         binding.cancelButton.visibility = View.GONE
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        loadImagesForClass { generateLabelIfNeeded() }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioHelper.release()
     }
 }

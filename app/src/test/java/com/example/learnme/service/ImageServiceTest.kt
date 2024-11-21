@@ -82,6 +82,7 @@ class ImageServiceTest {
     }
 
     @Test
+    //Cuando se ejecuta saveImage, se debe guardar la imagen en la base de datos
     fun `saveImage should save a single image to the database`() {
         // Datos de prueba
         val imagePath = "path1.jpg"

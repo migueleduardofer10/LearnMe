@@ -42,7 +42,7 @@ class GPT4Helper(
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "Genera un nombre descriptivo de esta imagen en español de no más de 15 caracteres."},
+                            {"type": "text", "text": "Genera un nombre descriptivo de esta imagen en español de no más de 10 caracteres."},
                             {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,$base64Image"}}
                         ]
                     }
