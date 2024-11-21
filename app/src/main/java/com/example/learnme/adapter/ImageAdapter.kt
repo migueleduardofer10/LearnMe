@@ -26,6 +26,7 @@ class ImageAdapter(
     // ViewHolder que contiene la vista de cada imagen individual
     class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
+        val checkmark: ImageView = view.findViewById(R.id.checkmark)
     }
 
 
@@ -47,6 +48,7 @@ class ImageAdapter(
 
         // Cambiar la opacidad de la imagen según el estado de selección
         holder.imageView.alpha = if (imageItem.isSelected) 0.5f else 1.0f
+        holder.checkmark.visibility = if (imageItem.isSelected) View.VISIBLE else View.GONE
 
         // Configurar un clic para manejar la selección de imágenes
         holder.imageView.setOnClickListener {
@@ -72,13 +74,6 @@ class ImageAdapter(
     // Método para limpiar todas las selecciones
     fun clearSelection() {
         selectedImages.forEach { it.isSelected = false }
-        selectedImages.clear()
-        notifyDataSetChanged()
-    }
-
-    // Método para eliminar las imágenes seleccionadas
-    fun deleteSelectedImages() {
-        imageList.removeAll(selectedImages)
         selectedImages.clear()
         notifyDataSetChanged()
     }

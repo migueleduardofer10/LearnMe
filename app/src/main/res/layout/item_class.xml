@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/rounded_corners"
-    android:padding="20dp"
+    android:padding="15dp"
     android:layout_marginBottom="10dp">
 
     <!-- Contenedor para el título y el botón de eliminar -->
@@ -29,9 +29,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_remove_40px"
-            android:contentDescription="Eliminar clase"
-            android:tint="@android:color/holo_red_dark" />
+            android:src="@drawable/ic_close_small_40px"
+            android:contentDescription="Eliminar clase"/>
     </RelativeLayout>
 
     <!-- Muestras de clase -->
@@ -46,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
-            android:text="Muestras: ¿?"
+            android:text="Muestras: 0"
             style="@style/Paragraph"/>
     </LinearLayout>
 

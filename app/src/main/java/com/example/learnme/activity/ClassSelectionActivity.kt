@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import android.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.learnme.data.AppDatabase
 import com.example.learnme.adapter.ItemAdapter
@@ -21,8 +20,8 @@ import kotlinx.coroutines.withContext
 class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListener {
 
     private lateinit var binding: ActivityClassSelectionBinding
-    private lateinit var itemList: MutableList<ItemClass>
-    private lateinit var adapter: ItemAdapter
+    private var itemList: MutableList<ItemClass> = emptyList<ItemClass>().toMutableList()
+    private var adapter: ItemAdapter = ItemAdapter(itemList, this)
 
     private lateinit var classService: ClassService
 
@@ -58,6 +57,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         super.onResume()
         refreshClasses()
     }
+
     private fun setupRecyclerView() {
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(this)
         adapter = ItemAdapter(itemList, this)
@@ -65,38 +65,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
         refreshClasses()
     }
 
-    private fun handleAddNewClass() {
-        CoroutineScope(Dispatchers.IO).launch {
-            if (itemList.size >= 4) {
-                withContext(Dispatchers.Main) {
-                    AlertDialog.Builder(this@ClassSelectionActivity)
-                        .setTitle("Límite alcanzado")
-                        .setMessage("Solo puedes tener un máximo de 4 clases.")
-                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
-                        .create()
-                        .show()
-                }
-                return@launch
-            }
-
-            try {
-                val newClass = classService.addNewClass()
-                refreshClasses()
-            } catch (e: IllegalStateException) {
-                withContext(Dispatchers.Main) {
-                    AlertDialog.Builder(this@ClassSelectionActivity)
-                        .setTitle("Error")
-                        .setMessage(e.message)
-                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
-                        .create()
-                        .show()
-                }
-            }
-        }
-    }
-
-
-
+    //Carga la lista de clases actualizada
     private fun refreshClasses() {
         CoroutineScope(Dispatchers.IO).launch {
             val classes = classService.getAllClasses()
@@ -107,6 +76,38 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             }
         }
     }
+
+    private fun handleAddNewClass() {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (itemList.size >= 4) {
+                withContext(Dispatchers.Main) {
+                    //Validación de clases
+                    AlertDialog.Builder(this@ClassSelectionActivity)
+                        .setTitle("Límite alcanzado")
+                        .setMessage("Solo puedes tener un máximo de 4 clases.")
+                        .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                        .create()
+                        .show()
+                }
+                return@launch
+            } else {
+                try {
+                    classService.addNewClass()
+                    refreshClasses()
+                } catch (e: IllegalStateException) {
+                    withContext(Dispatchers.Main) {
+                        AlertDialog.Builder(this@ClassSelectionActivity)
+                            .setTitle("Error")
+                            .setMessage(e.message)
+                            .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
+                            .create()
+                            .show()
+                    }
+                }
+            }
+        }
+    }
+
     private fun validateClassCountBeforeProceeding() {
         CoroutineScope(Dispatchers.IO).launch {
             if (itemList.size != 4) {
@@ -120,7 +121,7 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
                 }
                 return@launch
             }
-
+            //Validar que las clases tengan imágenes
             val incompleteClasses = classService.getClassesWithoutImages()
             withContext(Dispatchers.Main) {
                 if (incompleteClasses.isNotEmpty()) {
@@ -184,7 +185,6 @@ class ClassSelectionActivity : ComponentActivity(), ItemAdapter.OnItemClickListe
             }
         }
     }
-
 
 
 }

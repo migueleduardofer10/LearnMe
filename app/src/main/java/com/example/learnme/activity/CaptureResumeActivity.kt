@@ -6,9 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
@@ -42,6 +41,7 @@ class CaptureResumeActivity : ComponentActivity() {
     private lateinit var audioHelper: AudioHelper
     private lateinit var gptHelper: GPT4Helper
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -97,6 +97,25 @@ class CaptureResumeActivity : ComponentActivity() {
     }
 
     private fun setupButtonClickListeners() {
+        binding.nameEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                val newClassName = binding.nameEditText.text.toString().trim()
+                if (newClassName.isNotEmpty()) {
+                    saveClassName(newClassName)
+                }
+
+                // Ocultar el teclado
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(binding.nameEditText.windowToken, 0)
+
+                // Limpiar el foco del EditText
+                binding.nameEditText.clearFocus()
+                true // Indicar que se ha manejado el evento
+            } else {
+                false // Devolver false para permitir otras acciones predeterminadas
+            }
+        }
+
         // Crear un método de orden superior para reducir la duplicación
         val clearFocusAndExecute: (View.OnClickListener) -> View.OnClickListener = { action ->
             View.OnClickListener {
@@ -204,10 +223,6 @@ class CaptureResumeActivity : ComponentActivity() {
                 audioHelper.setAudioUri(Uri.parse(it))
             }
         }
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        audioHelper.release()
     }
 
     private fun loadClassName() {
@@ -343,5 +358,16 @@ class CaptureResumeActivity : ComponentActivity() {
         binding.hamburgerButton.visibility = View.VISIBLE
         binding.deleteButton.visibility = View.GONE
         binding.cancelButton.visibility = View.GONE
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        loadImagesForClass { generateLabelIfNeeded() }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioHelper.release()
     }
 }

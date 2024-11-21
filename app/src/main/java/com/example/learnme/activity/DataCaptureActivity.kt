@@ -131,13 +131,13 @@ class DataCaptureActivity : ComponentActivity() {
     }
 
     private fun hasReachedMaxSamples(): Boolean {
-        return imageList.size >= 5
+        return imageList.size >= 20
     }
 
     private fun showMaxSamplesReachedAlert() {
         AlertDialog.Builder(this)
             .setTitle("Límite alcanzado")
-            .setMessage("Solo puedes capturar un máximo de 5 imágenes para esta clase.")
+            .setMessage("Solo puedes capturar un máximo de 20 imágenes para esta clase.")
             .setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss() }
             .create()
             .show()
@@ -184,8 +184,7 @@ class DataCaptureActivity : ComponentActivity() {
     private fun exitSelectionMode() {
         isSelectionMode = false
         adapter.isSelectionMode = false
-        imageList.forEach { it.isSelected = false } // Limpiar selección
-        adapter.notifyDataSetChanged()
+        adapter.clearSelection()
         updateUIForNormalMode()
     }
 
@@ -193,8 +192,8 @@ class DataCaptureActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val selectedImages = imageList.filter { it.isSelected }
             val imagePaths = selectedImages.map { it.imagePath }
-            imageService.deleteImagesByPaths(imagePaths)
 
+            imageService.deleteImagesByPaths(imagePaths)
             withContext(Dispatchers.Main) {
                 imageList.removeAll(selectedImages)
                 adapter.notifyDataSetChanged()
@@ -203,13 +202,15 @@ class DataCaptureActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUIForSelectionMode() {
-        binding.fileCountTextView.text = "Seleccionar imágenes"
+        binding.fileCountTextView.text = "Seleccionar"
         binding.hamburgerButton.visibility = View.GONE
         binding.deleteButton.visibility = View.VISIBLE
         binding.cancelButton.visibility = View.VISIBLE
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUIForNormalMode() {
         binding.fileCountTextView.text = "Imágenes capturadas"
         binding.hamburgerButton.visibility = View.VISIBLE
