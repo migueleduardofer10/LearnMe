@@ -4,39 +4,44 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/buttonLayout"
-        android:orientation="vertical"
+        android:layout_above="@id/buttonLayout"
         android:paddingHorizontal="30dp"
-        android:paddingVertical="50dp">
+        android:paddingTop="50dp">
 
-        <TextView
-            android:id="@+id/nameTitleText"
-            style="@style/Headline3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Galería" />
-
-        <TextView
-            android:id="@+id/fileCountTextView"
-            style="@style/Paragraph"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Recientes" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewImages"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical"
-            android:paddingStart="-2dp"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/nameTitleText"
+                style="@style/Headline3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Galería" />
+
+            <TextView
+                android:id="@+id/fileCountTextView"
+                style="@style/Paragraph"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Recientes" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewImages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="-2dp"
+                android:scrollbars="vertical" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
 
     <LinearLayout
         android:id="@+id/buttonLayout"
