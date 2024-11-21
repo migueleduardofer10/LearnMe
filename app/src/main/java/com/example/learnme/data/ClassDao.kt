@@ -30,8 +30,6 @@ interface ClassDao {
 
     @Query("UPDATE classes SET audio_path = :audioPath WHERE classId = :classId")
     fun updateAudioPath(classId: Int, audioPath: String)
-
-
 }
 
 @Dao

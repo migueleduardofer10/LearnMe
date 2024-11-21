@@ -28,11 +28,10 @@ class ClassService(private val database: AppDatabase) {
         }
     }
 
-
-
     fun addNewClass(): ItemClass {
         val currentClassCount = getClassCount()
 
+        //Validación de clases
         if (currentClassCount >= 4) {
             throw IllegalStateException("No se pueden agregar más de 4 clases.")
         }
@@ -87,5 +86,4 @@ class ClassService(private val database: AppDatabase) {
             ItemClass(classEntity.className, classEntity.classId, 0)
         }
     }
-
 }
