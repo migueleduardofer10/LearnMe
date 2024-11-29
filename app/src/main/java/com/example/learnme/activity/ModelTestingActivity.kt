@@ -1,6 +1,7 @@
 package com.example.learnme.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
@@ -57,6 +58,10 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         loadAudioUrisFromDatabase {
             TransferLearningManager.updateClassifierListener(this)
             // Aquí se pueden realizar configuraciones adicionales si es necesario
+        }
+
+        binding.recaptureButton.setOnClickListener {
+            startActivity(Intent(this, ClassSelectionActivity::class.java))
         }
     }
 
@@ -190,6 +195,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         }
 
         Log.d("Inference", "Imagen capturada")
+
 
         // Copia los píxeles de la imagen en el buffer de bitmap
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
