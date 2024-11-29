@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import com.example.learnme.config.GPTConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParseException
@@ -22,7 +23,7 @@ class GPT4Helper(
 ) {
     private val gson = Gson()
     var baseUrl: String = "https://api.openai.com/v1/chat/completions"
-    private val apiKey = System.getenv("OPENAI_API_KEY") ?: "clave_por_defecto"
+    private val apiKey = GPTConfig.OPENAI_API_KEY
 
     // Codifica la imagen a Base64
     fun encodeImageToBase64(imagePath: String): String {
