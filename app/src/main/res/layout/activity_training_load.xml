@@ -37,6 +37,7 @@
         android:id="@+id/stopButton"
         android:layout_marginTop="86dp"
         android:text="Detener"
+        android:visibility="invisible"
         style="@style/button_1" />
 
 

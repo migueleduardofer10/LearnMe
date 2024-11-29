@@ -1,6 +1,5 @@
 package com.example.learnme.helper
 
-import com.example.learnme.config.GPTConfig
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -22,11 +21,11 @@ class GPT4HelperTest {
         mockWebServer = MockWebServer()
         mockWebServer.start()
 
-        // Usar la URL del servidor mock en lugar de la real
-        GPTConfig.BASE_URL = mockWebServer.url("/").toString()
-
         okHttpClient = OkHttpClient()
         gpt4Helper = GPT4Helper(okHttpClient)
+
+        // Usar la URL del servidor mock en lugar de la real
+        gpt4Helper.baseUrl = mockWebServer.url("/").toString()
     }
 
     @After

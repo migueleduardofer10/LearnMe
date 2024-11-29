@@ -3,6 +3,7 @@ package com.example.learnme.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.learnme.data.AppDatabase
@@ -12,6 +13,7 @@ import com.example.learnme.helper.TransferLearningHelper
 import com.example.learnme.helper.TransferLearningManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.support.label.Category
@@ -45,6 +47,9 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
 
             // Iniciar entrenamiento
             TransferLearningManager.startTraining()
+
+            delay(5000)
+            binding.stopButton.visibility = View.VISIBLE
         }
 
         binding.stopButton.setOnClickListener {

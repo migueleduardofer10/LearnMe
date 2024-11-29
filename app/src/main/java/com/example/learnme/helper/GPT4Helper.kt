@@ -22,6 +22,8 @@ class GPT4Helper(
     private val client: OkHttpClient
 ) {
     private val gson = Gson()
+    var baseUrl: String = "https://api.openai.com/v1/chat/completions"
+    private val apiKey = GPTConfig.OPENAI_API_KEY
 
     // Codifica la imagen a Base64
     fun encodeImageToBase64(imagePath: String): String {
@@ -33,8 +35,8 @@ class GPT4Helper(
 
     // Envía la imagen a la API de GPT-4 para obtener una etiqueta
     fun sendImageToGPT4(base64Image: String, callback: (String) -> Unit) {
-        val url = GPTConfig.BASE_URL
-        val apiKey = GPTConfig.CHAT_GPT_API_KEY
+        val url = baseUrl
+        val apiKey = apiKey
         val requestBody = """
             {
                 "model": "gpt-4o-mini",
