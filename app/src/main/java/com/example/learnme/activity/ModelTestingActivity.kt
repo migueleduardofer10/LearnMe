@@ -31,6 +31,11 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
     private var currentPlayingClass: String? = null
     private var audioUrisLoaded = false
 
+    // Variables para realizar el seguimiento de precisión y velocidad
+    private var totalImagesTested = 0
+    private var correctClassifications = 0
+    private var totalInferenceTime = 0L
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -202,6 +207,31 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         transferLearningHelper.classify(bitmapBuffer, image.imageInfo.rotationDegrees)
     }
 
+    override fun onStop() {
+        super.onStop()
+
+        // Al salir de la actividad, calculamos las métricas finales
+
+        // Calcular la precisión
+        val accuracy = if (totalImagesTested > 0) {
+            (correctClassifications.toFloat() / totalImagesTested) * 100
+        } else {
+            0f
+        }
+
+        // Calcular el tiempo promedio de inferencia
+        val avgInferenceTime = if (totalImagesTested > 0) {
+            totalInferenceTime / totalImagesTested
+        } else {
+            0L
+        }
+
+        Log.d("ModelTestingActivity", "Número de imágenes probadas: $totalImagesTested")
+        Log.d("ModelTestingActivity", "Número de clasificaciones correctas: $correctClassifications")
+        Log.d("ModelTestingActivity", "Precisión: %.2f%%".format(accuracy))
+        Log.d("ModelTestingActivity", "Tiempo total de clasificación: $totalInferenceTime ms")
+        Log.d("ModelTestingActivity", "Tiempo promedio por imagen: %.2f ms".format(avgInferenceTime.toFloat()))
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -216,12 +246,21 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
 
     @SuppressLint("SetTextI18n")
     override fun onResults(results: List<Category>?, inferenceTime: Long) {
+        Log.d("InferenceResult", "Tiempo de inferencia para la imagen: $inferenceTime ms")
         runOnUiThread {
             results?.let { list ->
                 list.maxByOrNull { it.score }?.let { highestScoreCategory ->
                     val confidenceScore = highestScoreCategory.score
                     val label = highestScoreCategory.label
                     Log.d("InferenceResult", "Categoría: $label, Puntaje: $confidenceScore, Tiempo de inferencia: $inferenceTime ms")
+
+                    totalImagesTested++
+                    if (confidenceScore == 1.0f) {
+                        correctClassifications++
+                    }
+
+                    // Acumular el tiempo de inferencia
+                    totalInferenceTime += inferenceTime
 
                     if (audioUrisLoaded && confidenceScore == 1.0f) {
                         val classId = label.toIntOrNull() ?: -1

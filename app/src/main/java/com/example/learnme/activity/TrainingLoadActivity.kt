@@ -17,12 +17,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.support.label.Category
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.ClassifierListener {
 
     private lateinit var binding: ActivityTrainingLoadBinding
     private lateinit var database: AppDatabase
+    private var trainingStartTime: Long = 0
+    private var trainingEndTime: Long = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +50,11 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
                 this@TrainingLoadActivity
             )
 
+            // Registrar tiempo de inicio
+            trainingStartTime = System.currentTimeMillis()
+            val startFormattedTime = formatTime(trainingStartTime)
+            Log.d("TiempoEntrenamiento", "Inicio del entrenamiento: $startFormattedTime")
+
             // Iniciar entrenamiento
             TransferLearningManager.startTraining()
 
@@ -53,9 +63,30 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
         }
 
         binding.stopButton.setOnClickListener {
+            // Registrar tiempo de fin cuando se pause el entrenamiento
+            trainingEndTime = System.currentTimeMillis()
+            val endFormattedTime = formatTime(trainingEndTime)
+            Log.d("TiempoEntrenamiento", "Fin del entrenamiento: $endFormattedTime")
+
+            // Calcular la duración
+            val duration = trainingEndTime - trainingStartTime
+            val formattedDuration = formatDuration(duration)
+            Log.d("TiempoEntrenamiento", "Duración total del entrenamiento: $formattedDuration")
+
             TransferLearningManager.pauseTraining()
             startActivity(Intent(this, Step3Activity::class.java))
         }
+    }
+
+    private fun formatTime(timeInMillis: Long): String {
+        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.US)
+        return dateFormat.format(Date(timeInMillis))
+    }
+
+    private fun formatDuration(durationInMillis: Long): String {
+        val minutes = (durationInMillis / 1000) / 60
+        val seconds = (durationInMillis / 1000) % 60
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 
 
