@@ -1,5 +1,6 @@
 package com.example.learnme.activity
 
+import ActivityTimeTracker
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
@@ -40,6 +41,8 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
 
     private lateinit var resourceUsageMonitor: ResourceUsageMonitor
     private lateinit var batteryUsageMonitor: BatteryUsageMonitor
+
+    private val activityTimeTracker = ActivityTimeTracker()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -225,6 +228,8 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         Log.d("ModelTestingActivity", "Tiempo promedio por imagen: %.2f ms".format(avgInferenceTime.toFloat()))
 
         logMemoryUsage(this)
+
+        activityTimeTracker.endActivity()
     }
 
     override fun onDestroy() {
