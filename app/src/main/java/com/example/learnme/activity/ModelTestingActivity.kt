@@ -16,6 +16,9 @@ import com.example.learnme.helper.CameraHelper
 import com.example.learnme.helper.CameraPermissionsManager
 import com.example.learnme.helper.TransferLearningHelper
 import com.example.learnme.helper.TransferLearningManager
+import com.tuempresa.helpers.BatteryUsageMonitor
+import com.tuempresa.helpers.ResourceUsageMonitor
+import com.tuempresa.helpers.logMemoryUsage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.support.label.Category
@@ -31,20 +34,25 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
     private var currentPlayingClass: String? = null
     private var audioUrisLoaded = false
 
-    // Variables para realizar el seguimiento de precisión y velocidad
     private var totalImagesTested = 0
     private var correctClassifications = 0
     private var totalInferenceTime = 0L
 
+    private lateinit var resourceUsageMonitor: ResourceUsageMonitor
+    private lateinit var batteryUsageMonitor: BatteryUsageMonitor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityModelTestingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializar y verificar permisos antes de cargar los URIs de audio o cualquier operación adicional
+        resourceUsageMonitor = ResourceUsageMonitor(this)
+        batteryUsageMonitor = BatteryUsageMonitor(this)
+
+        resourceUsageMonitor.startCpuMonitoring()
+        batteryUsageMonitor.startMonitoring()
+
         val cameraPermissionsManager = CameraPermissionsManager(this) {
-            // Una vez otorgado el permiso, inicializar la cámara
             cameraHelper = CameraHelper(
                 this,
                 binding.previewView,
@@ -56,13 +64,10 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
 
         cameraPermissionsManager.checkAndRequestPermission()
 
-        // Configurar el MediaPlayer
         initializeMediaPlayer()
 
-        // Cargar los URIs de audio después de la verificación de permisos
         loadAudioUrisFromDatabase {
             TransferLearningManager.updateClassifierListener(this)
-            // Aquí se pueden realizar configuraciones adicionales si es necesario
         }
 
         binding.recaptureButton.setOnClickListener {
@@ -71,7 +76,6 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
     }
 
 
-    // Modificación en loadAudioUrisFromDatabase para recibir una función 'onComplete'
     private var classIdToNameMap: MutableMap<Int, String> = mutableMapOf() // Mapa que asocia classId a className
 
     private fun loadAudioUrisFromDatabase(onComplete: () -> Unit) {
@@ -86,7 +90,6 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                 val classId = classEntity.classId
                 val audioPath = classEntity.audioPath
 
-                // Rellenar el mapa con classId y className
                 classIdToNameMap[classId] = className
 
                 if (audioPath != null) {
@@ -100,7 +103,6 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
             audioUrisLoaded = true
             Log.d("AudioDebug", "Carga de URIs de audio completa. Total URIs cargados: ${audioUriMap.size}")
 
-            // Ejecutar la acción después de cargar los URIs
             launch(Dispatchers.Main) { onComplete() }
         }
     }
@@ -117,7 +119,7 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                 }
                 setOnCompletionListener {
                     Log.d("MediaPlayer", "Reproducción completada")
-                    it.reset() // Resetea para que pueda ser reutilizado más tarde
+                    it.reset()
                 }
             }
         }
@@ -127,7 +129,6 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         Log.d("playClassAudio", "Intentando reproducir audio para la clase: '$className'")
 
         if (className != currentPlayingClass) {
-            // Si hay un audio en reproducción, detenerlo y resetear
             mediaPlayer?.apply {
                 if (isPlaying) {
                     Log.d("playClassAudio", "Deteniendo el audio actual y reseteando.")
@@ -136,18 +137,14 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
                 }
             }
 
-            // Verifica si el MediaPlayer es null y lo inicializa si es necesario
             if (mediaPlayer == null) {
                 initializeMediaPlayer()
             }
 
-            // Busca el URI correspondiente al className
             val audioUri = audioUriMap.entries.find { it.value.first == className }?.value?.second
             if (audioUri != null) {
                 try {
-                    // Configura la fuente de datos del MediaPlayer
                     mediaPlayer?.apply {
-                        // El MediaPlayer debe estar reseteado antes de setear una nueva fuente
                         reset()
 
                         setDataSource(applicationContext, audioUri)
@@ -159,10 +156,9 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
 
                         setOnCompletionListener {
                             Log.d("playClassAudio", "Reproducción completada para la clase $className.")
-                            it.reset() // Resetear para poder reutilizarlo
+                            it.reset()
                         }
 
-                        // Prepara el MediaPlayer de forma asíncrona para evitar bloquear el hilo principal
                         prepareAsync()
                     }
 
@@ -186,11 +182,10 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
         val transferLearningHelper = TransferLearningManager.getTransferLearningHelper()
         if (transferLearningHelper == null) {
             Log.e("Inference", "TransferLearningHelper no inicializado")
-            image.close()  // Asegúrate de cerrar la imagen para evitar fugas de memoria
+            image.close()
             return
         }
 
-        // Procesar la imagen solo si TransferLearningHelper está listo
         if (!::bitmapBuffer.isInitialized) {
             bitmapBuffer = Bitmap.createBitmap(
                 image.width,
@@ -201,8 +196,6 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
 
         Log.d("Inference", "Imagen capturada")
 
-
-        // Copia los píxeles de la imagen en el buffer de bitmap
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
         transferLearningHelper.classify(bitmapBuffer, image.imageInfo.rotationDegrees)
     }
@@ -210,27 +203,28 @@ class ModelTestingActivity : ComponentActivity(), TransferLearningHelper.Classif
     override fun onStop() {
         super.onStop()
 
-        // Al salir de la actividad, calculamos las métricas finales
+        resourceUsageMonitor.stopCpuMonitoring()
+        batteryUsageMonitor.stopMonitoring()
 
-        // Calcular la precisión
         val accuracy = if (totalImagesTested > 0) {
             (correctClassifications.toFloat() / totalImagesTested) * 100
         } else {
             0f
         }
 
-        // Calcular el tiempo promedio de inferencia
         val avgInferenceTime = if (totalImagesTested > 0) {
             totalInferenceTime / totalImagesTested
         } else {
             0L
         }
 
-        Log.d("ModelTestingActivity", "Número de imágenes probadas: $totalImagesTested")
+        Log.d("ModelTestingActivity", "Total de imágenes procesadas (Inferencia): $totalImagesTested")
         Log.d("ModelTestingActivity", "Número de clasificaciones correctas: $correctClassifications")
         Log.d("ModelTestingActivity", "Precisión: %.2f%%".format(accuracy))
         Log.d("ModelTestingActivity", "Tiempo total de clasificación: $totalInferenceTime ms")
         Log.d("ModelTestingActivity", "Tiempo promedio por imagen: %.2f ms".format(avgInferenceTime.toFloat()))
+
+        logMemoryUsage(this)
     }
 
     override fun onDestroy() {

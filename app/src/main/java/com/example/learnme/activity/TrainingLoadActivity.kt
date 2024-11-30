@@ -27,6 +27,7 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
     private lateinit var database: AppDatabase
     private var trainingStartTime: Long = 0
     private var trainingEndTime: Long = 0
+    private var totalImagesProcessedTraining = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +42,7 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
         // Iniciar configuración y entrenamiento de forma asincrónica
         CoroutineScope(Dispatchers.Main).launch {
             val numberOfClasses = getNumberOfClasses()
-            Log.d("TrainingLoadActivity", "Número de clases: ${numberOfClasses.size}")
+            Log.d("TrainingLoadActivity", "Número de clases evaluadas: ${numberOfClasses.size}")
 
             // Inicializar TransferLearning en el Singleton
             TransferLearningManager.initialize(
@@ -58,6 +59,8 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
             // Iniciar entrenamiento
             TransferLearningManager.startTraining()
 
+            processImageForTraining()
+
             delay(5000)
             binding.stopButton.visibility = View.VISIBLE
         }
@@ -72,6 +75,9 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
             val duration = trainingEndTime - trainingStartTime
             val formattedDuration = formatDuration(duration)
             Log.d("TiempoEntrenamiento", "Duración total del entrenamiento: $formattedDuration")
+
+            // Log del número de imágenes procesadas durante el entrenamiento
+            Log.d("TrainingLoadActivity", "Total de imágenes procesadas (Entrenamiento): $totalImagesProcessedTraining")
 
             TransferLearningManager.pauseTraining()
             startActivity(Intent(this, Step3Activity::class.java))
@@ -89,6 +95,10 @@ class TrainingLoadActivity : ComponentActivity(), TransferLearningHelper.Classif
         return String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 
+    private fun processImageForTraining() {
+        totalImagesProcessedTraining++
+        Log.d("TrainingLoadActivity", "Imagen procesada en entrenamiento: $totalImagesProcessedTraining")
+    }
 
     private suspend fun getNumberOfClasses(): List<ClassEntity> = withContext(Dispatchers.IO) {
         // Obtener el número total de clases en la base de datos
