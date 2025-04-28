@@ -22,7 +22,7 @@ class GPT4Helper(
     private val client: OkHttpClient
 ) {
     private val gson = Gson()
-    var baseUrl: String = "https://api.openai.com/v1/chat/completions"
+    var baseUrl: String = GPTConfig.BASE_URL
     private val apiKey = GPTConfig.OPENAI_API_KEY
 
     // Codifica la imagen a Base64
